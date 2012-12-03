@@ -32,7 +32,7 @@ def mux2(sel, mux_out, chan1, chan2):
     return route_channel
 
 
-def mux4(sel, mux_out, chan1, chan2, chan3, chan4=Signal(0)):
+def mux4(sel, mux_out, chan1, chan2, chan3, chan4=Signal(intbv(0)[1:])):
     """
     4-channels m-bits multiplexor
 

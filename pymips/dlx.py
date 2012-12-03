@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
 
@@ -34,9 +34,9 @@ from forwarding import forwarding
 from hazard_detector import hazard_detector
 
 
-SIM_TIME = 20  # time to simulation.
+SIM_TIME = 30  # time to simulation.
 
-DEBUG = True  # set to false to convert
+DEBUG = True # set to false to convert
 
 
 import random
@@ -132,7 +132,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     INCREMENT = 1  # it's 4 in the book, but my instruction memory is organized in 32bits words, not in bytes
     PcAdderOut_if = Signal(intbv(0)[32:])  # output of pc_adder - input0 branch_adder and mux_branch
 
-    pc_adder = ALU(Signal(0b0010), Ip, Signal(INCREMENT), PcAdderOut_if, Signal(0))  # hardwiring an ALU to works as an adder
+    pc_adder = ALU(Signal(intbv('0010')[4:]), Ip, Signal(intbv(INCREMENT)[1:]), PcAdderOut_if, Signal(intbv(0)[1:]))  # hardwiring an ALU to works as an adder
 
     #mux controlling next ip branches.
 
@@ -244,7 +244,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     mux_alu_src = mux2(ALUSrc_ex, MuxAluDataSrc_ex, ForwMux2Out, Address32_ex)
 
     #Branch adder
-    branch_adder_ = ALU(Signal(0b0010), PcAdderOut_ex, Address32_ex, BranchAdderO_ex, Signal(0))
+    branch_adder_ = ALU(Signal(intbv('0010')[4:]), PcAdderOut_ex, Address32_ex, BranchAdderO_ex, Signal(intbv(0)[1:]))
 
     #ALU Control
     AluControl = Signal(intbv('1111')[4:])  # control signal to alu
@@ -259,7 +259,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     ##############################
     # EX/MEM
     ##############################
-    BranchAdderO_mem = Signal(intbv(0, min=MIN, max=MAX))
+    #BranchAdderO_mem = Signal(intbv(0, min=MIN, max=MAX))
 
     Zero_mem = Signal(intbv(0)[1:])
 
@@ -283,7 +283,6 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
                                  Data2_mem, WrRegDest_mem,
                                  Branch_mem, MemRead_mem, MemWrite_mem,  # signals to MEM pipeline stage
                                  RegWrite_mem, MemtoReg_mem,  # signals to WB pipeline stage
-
                                  )
 
     ##############################
