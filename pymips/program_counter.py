@@ -8,16 +8,17 @@ Program counter
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-                  intbv, bin, instance, instances, now, toVHDL, traceSignals
+    intbv, bin, instance, instances, now, toVHDL, traceSignals
 
 from clock_driver import clock_driver
 
 from alu import ALU
 
+
 def program_counter(clk, input, output, stall=Signal(intbv(0)[1:])):
     """
 
-    clk : clock signal 
+    clk : clock signal
     input: the input count
     output: address output
     """
@@ -37,12 +38,10 @@ def testbench():
     o = Signal(intbv(0, min=0, max=32))
 
     clkdriver_inst = clock_driver(clk)
-    pc_inst = program_counter( clk, i, o)
-    
-    
-    c = Signal(0b0010)
-    alu_i = ALU( c, o, Signal(1), i, Signal(0))
+    pc_inst = program_counter(clk, i, o)
 
+    c = Signal(0b0010)
+    alu_i = ALU(c, o, Signal(1), i, Signal(0))
 
     @instance
     def stimulus():
@@ -60,4 +59,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    

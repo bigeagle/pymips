@@ -10,15 +10,15 @@ AND gate
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-                  intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL
 
 from myhdl.conversion import analyze
 
 
 def and_gate(op1, op2, out):
     """
-    op1: operator 1. 
-    op2: operator 2. 
+    op1: operator 1.
+    op2: operator 2.
     out: and
     """
 
@@ -33,14 +33,12 @@ def and_gate(op1, op2, out):
 
 def testBench_gate():
 
-
     op1_i = Signal(intbv(0)[1:])
     op2_i = Signal(intbv(0)[1:])
-    
+
     out_i = Signal(intbv(0)[1:])
 
     and_gate_i = toVHDL(and_gate, op1_i, op2_i, out_i)
-
 
     @instance
     def stimulus():
@@ -52,8 +50,8 @@ def testBench_gate():
 
                 yield delay(2)
 
-                print "%i %i | %i " % (op1_i, op2_i, out_i) 
-        
+                print "%i %i | %i " % (op1_i, op2_i, out_i)
+
     return instances()
 
 

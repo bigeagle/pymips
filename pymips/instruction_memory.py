@@ -7,18 +7,19 @@ Instruction memory
 """
 
 from myhdl import Signal, delay, always_comb, now, Simulation, \
-                  intbv, bin, instance, instances, toVHDL, toVerilog
+    intbv, bin, instance, instances, toVHDL, toVerilog
 
 
-def load_program(ROM, program=None, comment_char='#' ):
+def load_program(ROM, program=None, comment_char='#'):
     if program is None:
         try:
             import sys
             program = sys.argv[1]
-            import pdb;pdb.set_trace()
+            import pdb
+            pdb.set_trace()
         except IndexError:
             #default
-            program= '../programs/simple.txt'
+            program = '../programs/simple.txt'
 
     index = 0
     for line in open(program):
@@ -32,6 +33,7 @@ def load_program(ROM, program=None, comment_char='#' ):
 
 ROM = load_program([0] * 32)
 
+
 def instruction_memory(address, instruction):
     """
     address -- the pointer defined by PC
@@ -44,13 +46,10 @@ def instruction_memory(address, instruction):
     return logic
 
 
-
-
 def testBench():
 
     I = Signal(intbv(0, min=0, max=16))
     O = Signal(intbv(0)[32:])
-
 
     #pd_instance = prime_detector(E, S)
     im_instance = toVHDL(instruction_memory, I, O)
@@ -63,7 +62,6 @@ def testBench():
             print "address: " + bin(I, 4) + " (" + str(I) + ") | instruction: " + bin(O, 32)
 
     return instances()
-
 
 
 def main():

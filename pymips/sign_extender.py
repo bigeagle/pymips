@@ -9,11 +9,11 @@ Sign Extender
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-                  intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL
 
 
 def sign_extend(input16, output32):
-    
+
     @always_comb
     def logic():
         output32.next = input16.val
@@ -23,22 +23,21 @@ def sign_extend(input16, output32):
 
 def testBench():
 
-   
-    data_in = Signal( intbv(0, min=-(2**15),max=2**15-1))
+    data_in = Signal(intbv(0, min=-(2 ** 15), max=2 ** 15 - 1))
 
-    data_out = Signal( intbv(0, min=-(2**31),max=2**31-1))
+    data_out = Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1))
 
     sign_extend_i = toVHDL(sign_extend, data_in, data_out)
-    
+
     @instance
     def stimulus():
         for i in range(8):
-            value = random.randint(-(2**15), 2**15-1)
-            data_in.next = intbv( value, min=-(2**15), max=2**15-1)
-            
+            value = random.randint(-(2 ** 15), 2 ** 15 - 1)
+            data_in.next = intbv(value, min=-(2 ** 15), max=2 ** 15 - 1)
+
             print "In: %s (%i) | Out: %s (%i)" % (bin(data_in, 16), data_in, bin(data_out, 32), data_out)
             yield delay(5)
-        
+
     return instances()
 
 

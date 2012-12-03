@@ -10,9 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-                  intbv, bin, instance, now, toVHDL
-
-
+    intbv, bin, instance, now, toVHDL
 
 
 def mux2(sel, mux_out, chan1, chan2):
@@ -57,13 +55,12 @@ def mux4(sel, mux_out, chan1, chan2, chan3, chan4=Signal(0)):
     return route_channel
 
 
-
 def testBench():
 
     I0, I1, I2, I3 = [Signal(intbv(random.randint(0, 255))[32:]) for i in range(4)]
     O = Signal(intbv(0)[32:])
     S = Signal(intbv(0, min=0, max=4))
-   
+
     mux_inst = toVHDL(mux2, S, O, I2, I3)
     #mux_inst = toVHDL(mux4, S, O, I0, I1, I2, I3)
 
@@ -85,7 +82,5 @@ def main():
     sim.run(100)
 
 
-
 if __name__ == '__main__':
     main()
-    
