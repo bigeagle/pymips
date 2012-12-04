@@ -6,7 +6,7 @@
 Datapath
 """
 
-from myhdl import Signal, delay, always, always_comb, now, Simulation, \
+from myhdl import Signal, always, always_comb, Simulation, \
     intbv, bin, instance, instances, now, toVHDL, traceSignals
 
 from clock_driver import clock_driver
@@ -36,10 +36,9 @@ from hazard_detector import hazard_detector
 
 SIM_TIME = 30  # time to simulation.
 
-DEBUG = True # set to false to convert
+DEBUG = True  # set to false to convert
 
-
-import random
+import sys
 
 MIN = -(2 ** 31)
 MAX = 2 ** 31 - 1
@@ -419,11 +418,16 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
 
 def testBench():
+    global DEBUG
+    DEBUG = sys.argv[1] == '--debug'
+    VCD = sys.argv[1] == '--vcd'
 
-    if not DEBUG:
+    if VCD:
         datapath_i = traceSignals(dlx)  # () #toVHDL(datapath)
-    else:
+    elif DEBUG:
         datapath_i = dlx()
+    else:
+        toVHDL(dlx)
 
     return instances()
 

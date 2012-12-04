@@ -3,8 +3,8 @@
 #basic arithmetic  with RAW data hazard. (to test forwawding)  OK.
 000000 00010 00011 00001 00000 100000   # r1 = r2 + r3         | add $r1, $r2, $r3     | r1 = 7 
 000000 00001 00100 00101 00000 100010   # r5 = r1 - r4         | sub $r5, $r1, $r4     | r5 = 2
-
-#read following load (to test hazard detector/stalls) . OK.
+#
+##read following load (to test hazard detector/stalls) . OK.
 100011 00001 00001  0000000000000101    # r1 = Mem[r1 + 5]     | lw $r1, 5($r1)        | r1 = 51
 000000 00001 00011 00010 00000 100000   # r2 = r1 + r3         | add $r2, $r1, $r3     | r2 = 55 
 

@@ -12,14 +12,14 @@ from myhdl import Signal, delay, always_comb, now, Simulation, \
 
 def load_program(ROM, program=None, comment_char='#'):
     if program is None:
-        try:
-            import sys
-            program = sys.argv[1]
-            import pdb
-            pdb.set_trace()
-        except IndexError:
-            #default
-            program = '../programs/simple.txt'
+        #try:
+        #    import sys
+        #    program = sys.argv[1]
+        #    #import pdb
+        #    #pdb.set_trace()
+        #except IndexError:
+        #    #default
+        program = '../programs/simple.txt'
 
     index = 0
     for line in open(program):
