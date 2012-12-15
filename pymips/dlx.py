@@ -7,7 +7,7 @@ Datapath
 """
 
 from myhdl import Signal, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL, traceSignals
+    intbv, bin, instance, instances, now, toVHDL, toVerilog, traceSignals, delay
 
 from clock_driver import clock_driver
 from program_counter import program_counter
@@ -37,7 +37,7 @@ from hazard_detector import hazard_detector
 
 SIM_TIME = 30  # time to simulation.
 
-DEBUG = True  # set to false to convert
+DEBUG = False  # set to false to convert
 
 import sys
 
@@ -48,8 +48,7 @@ MIN_16 = -(2 ** 15)
 MAX_16 = 2 ** 15 - 1
 
 
-def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
-
+def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), program=None, data_mem=None, reg_mem=None):
     """
     A DLX processor with 5 pipeline stages.
     =======================================
@@ -120,7 +119,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     #instruction memory
     Ip = Signal(intbv(0)[32:])  # connect PC with intruction_memory
     Instruction_if = Signal(intbv(0)[32:])  # 32 bits instruction line.
-    im = instruction_memory(Ip, Instruction_if)
+    im = instruction_memory(Ip, Instruction_if, program)
 
     #PC
     NextIp = Signal(intbv(0)[32:])  # output of mux_branch - input of pc
@@ -183,7 +182,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     Data1_id = Signal(intbv(0, min=MIN, max=MAX))
     Data2_id = Signal(intbv(0, min=MIN, max=MAX))
 
-    register_file_i = register_file(Clk, Rs_id, Rt_id, WrRegDest_wb, MuxMemO_wb, RegWrite_wb, Data1_id, Data2_id, depth=32)
+    register_file_i = register_file(Clk, Rs_id, Rt_id, WrRegDest_wb, MuxMemO_wb, RegWrite_wb, Data1_id, Data2_id, depth=32, mem=reg_mem)
 
     ##############################
     # ID/EX
@@ -300,7 +299,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     branch_and_gate = and_gate(Branch_mem, Zero_mem, PCSrc_mem)
 
     #data memory
-    data_memory_ = data_memory(Clk, AluResult_mem, Data2_mem, DataMemOut_mem, MemRead_mem, MemWrite_mem)
+    data_memory_ = data_memory(Clk, AluResult_mem, Data2_mem, DataMemOut_mem, MemRead_mem, MemWrite_mem, mem=data_mem)
 
     ##############################
     # EX/WB
@@ -423,23 +422,32 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     return instances()
 
 
-def testBench():
+def testBench(args):
     global DEBUG
-    DEBUG = sys.argv[1] == '--debug'
-    VCD = sys.argv[1] == '--vcd'
-
-    if VCD:
+    DEBUG = args.debug
+    if args.vcd:
         datapath_i = traceSignals(dlx)  # () #toVHDL(datapath)
-    elif DEBUG:
+    elif args.debug:
         datapath_i = dlx()
-    else:
+    elif args.to_vhdl:
         toVHDL(dlx)
+    elif args.to_verilog:
+        toVerilog(dlx)
 
     return instances()
 
 
-def main():
-    sim = Simulation(testBench())
+def main(test=False):
+    import argparse
+    parser = argparse.ArgumentParser(description = 'A simple mips')
+    parser.add_argument('--debug', action='store_true', help='print debug information')
+    parser.add_argument('--vcd', action='store_true', help='export vcd file')
+    parser.add_argument('--to-vhdl', action='store_true', help='export to VHDL')
+    parser.add_argument('--to-verilog', action='store_true', help='export to Verilog')
+
+    args = parser.parse_args()
+
+    sim = Simulation(testBench(args))
     sim.run(SIM_TIME)
 
 

@@ -20,7 +20,6 @@ def load_program(ROM, program=None, comment_char='#'):
         #except IndexError:
         #    #default
         program = '../programs/simple.txt'
-
     index = 0
     for line in open(program):
         line = line.partition(comment_char)[0]
@@ -31,14 +30,14 @@ def load_program(ROM, program=None, comment_char='#'):
 
     return tuple(ROM)
 
-ROM = load_program([0] * 32)
 
 
-def instruction_memory(address, instruction):
+def instruction_memory(address, instruction, program=None):
     """
     address -- the pointer defined by PC
     instruction -- 32 bit encoded instruction
     """
+    ROM = load_program([0] * 32, program=program)
 
     @always_comb
     def logic():

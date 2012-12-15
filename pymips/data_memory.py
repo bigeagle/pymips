@@ -12,7 +12,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
     intbv, bin, instance, instances, now, toVHDL
 
 
-def data_memory(clk, address, write_data, read_data, memread, memwrite):
+def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None):
     """
     Ports:
 
@@ -24,7 +24,7 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite):
     memread -- interface enable: read address if 1
     """
 
-    mem = [Signal(intbv(2*i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(1024)]
+    mem = mem or [Signal(intbv(2*i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(1024)]
 
     #mem[6] = Signal(intbv(51, min=-(2 ** 31), max=2 ** 31 - 1))  # usefull to test load instruction directly
 

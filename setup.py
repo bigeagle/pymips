@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 with open('README.rst') as readme:
@@ -14,6 +14,7 @@ setup(
     author = u'Martín Gaitán',
     author_email = 'gaitan@gmail.com',
     url='https://github.com/nqnwebs/pymips',
+    test_suite='tests.dlx',
     packages=['pymips'],
     classifiers = [
         'Development Status :: 4 - Beta',
