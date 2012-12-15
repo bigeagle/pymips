@@ -28,6 +28,18 @@ def and_gate(op1, op2, out):
 
     return logic
 
+def sync_and_gate(clk, op1, op2, out):
+    """
+    op1: operator 1.
+    op2: operator 2.
+    out: and
+    """
+
+    @always(clk.negedge)
+    def logic():
+        out.next = op1 & op2
+
+    return logic
 
 ### TESTBENCHS
 

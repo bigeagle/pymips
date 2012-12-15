@@ -59,8 +59,8 @@ def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,  # inputs of EX hazards
         else:
             ForwardB.next = 0
 
-        print "Forward: RegW_mem:%d, Rd_mem:%d, Rs_ex:%d, Rt_ex:%d, RegW_wb:%d, Rd_wb: %d" % \
-                (RegWrite_mem, Rd_mem, Rs_ex, Rt_ex, RegWrite_wb, Rd_wb)
+        #print "Forward: RegW_mem:%d, Rd_mem:%d, Rs_ex:%d, Rt_ex:%d, RegW_wb:%d, Rd_wb: %d" % \
+        #        (RegWrite_mem, Rd_mem, Rs_ex, Rt_ex, RegWrite_wb, Rd_wb)
     return hazards_control
 
 

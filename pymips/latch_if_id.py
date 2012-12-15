@@ -13,7 +13,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
     intbv, bin, instance, instances, now, toVHDL
 
 
-def latch_if_id(clk, rst, instruction_in, pc_adder_in, instruction_out, pc_adder_out, stall=Signal(intbv(0)[1:])):
+def latch_if_id(clk, rst, instruction_in, ip_in, instruction_out, ip_out, stall=Signal(intbv(0)[1:])):
     """
     Latch to control state between Instruction Fetch and Instruction Decoder
 
@@ -27,16 +27,17 @@ def latch_if_id(clk, rst, instruction_in, pc_adder_in, instruction_out, pc_adder
     stall -- inhibit the count increment
     """
 
-    @always(clk.posedge, rst.posedge)
+    @always(clk.posedge)
     def latch():
         if rst == 1:
+            print "latch_if_id: Reset %d, %d" % (ip_out, ip_in)
             instruction_out.next = 0
-            pc_adder_out.next = 0
+            ip_out.next = 0
 
         else:
             if not stall:
                 instruction_out.next = instruction_in
-                pc_adder_out.next = pc_adder_in
+                ip_out.next = ip_in
 
     return latch
 

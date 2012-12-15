@@ -32,7 +32,7 @@ def latch_id_ex(clk, rst,
 
     """
 
-    @always(clk.posedge, rst.posedge)
+    @always(clk.posedge)
     def latch():
         if rst == 1:
             pc_adder_out.next = 0

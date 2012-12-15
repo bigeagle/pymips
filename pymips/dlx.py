@@ -17,7 +17,7 @@ from instruction_decoder import instruction_dec
 from alu import ALU
 
 from alu_control import alu_control
-from and_gate import and_gate
+from and_gate import sync_and_gate
 from control import control
 from register_file import register_file
 from sign_extender import sign_extend
@@ -35,7 +35,7 @@ from forwarding import forwarding
 from hazard_detector import hazard_detector
 
 
-SIM_TIME = 30  # time to simulation.
+SIM_TIME = 40  # time to simulation.
 
 DEBUG = False  # set to false to convert
 
@@ -118,12 +118,9 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     #instruction memory
     Ip = Signal(intbv(0)[32:])  # connect PC with intruction_memory
-    Instruction_if = Signal(intbv(0)[32:])  # 32 bits instruction line.
-    im = instruction_memory(Ip, Instruction_if, program)
 
     #PC
     NextIp = Signal(intbv(0)[32:])  # output of mux_branch - input of pc
-    pc = program_counter(Clk, input=NextIp, output=Ip, stall=Stall)
 
     #pc_adder
     INCREMENT = 1  # it's 4 in the book, but my instruction memory is organized in 32bits words, not in bytes
@@ -137,16 +134,23 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     mux_pc_source = mux2(sel=PCSrc_mem, mux_out=NextIp, chan1=PcAdderOut_if, chan2=BranchAdderO_mem)
 
+
+    pc = program_counter(Clk, input=NextIp, output=Ip, stall=Stall)
+
+    Instruction_if = Signal(intbv(0)[32:])  # 32 bits instruction line.
+    im = instruction_memory(Ip, Instruction_if, program)
+
+
     ##############################
     # IF/ID
     ##############################
 
-    PcAdderOut_id = Signal(intbv(0)[32:])
+    Ip_id = Signal(intbv(0)[32:])
     Instruction_id = Signal(intbv(0)[32:])
 
     latch_if_id_ = latch_if_id(clk=Clk, rst=FlushOnBranch, instruction_in=Instruction_if,
-                               pc_adder_in=PcAdderOut_if, instruction_out=Instruction_id,
-                               pc_adder_out=PcAdderOut_id, stall=Stall)
+                               ip_in=Ip, instruction_out=Instruction_id,
+                               ip_out=Ip_id, stall=Stall)
 
     ##############################
     # ID
@@ -187,7 +191,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     # ID/EX
     ##############################
-    PcAdderOut_ex = Signal(intbv(0)[32:])
+    Ip_ex = Signal(intbv(0)[32:])
 
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
     RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, MemRead_ex, MemWrite_ex, Branch_ex = signals_1bit
@@ -206,7 +210,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Address32_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     latch_id_ex_ = latch_id_ex(Clk, FlushOnBranch,
-                               PcAdderOut_id,
+                               Ip_id,
                                Data1_id, Data2_id, Address32_id,
                                Rs_id, Rt_id, Rd_id, Func_id,
 
@@ -214,7 +218,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                                Branch_id, MemRead_id, MemWrite_id,  # signals to MEM pipeline stage
                                RegWrite_id, MemtoReg_id,  # signals to WB pipeline stage
 
-                               PcAdderOut_ex,
+                               Ip_ex,
                                Data1_ex, Data2_ex, Address32_ex,
                                Rs_ex, Rt_ex, Rd_ex, Func_ex,
 
@@ -248,7 +252,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                        chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    branch_adder_ = adder(PcAdderOut_ex, Address32_ex, BranchAdderO_ex)
+    branch_adder_ = adder(Ip_ex, Address32_ex, BranchAdderO_ex)
 
     #ALU Control
     AluControl = Signal(intbv('1111')[4:])  # control signal to alu
@@ -275,6 +279,8 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(5)]
     MemtoReg_mem, RegWrite_mem, MemRead_mem, MemWrite_mem, Branch_mem = signals_1bit
 
+    branch_and_gate = sync_and_gate(Clk, Branch_ex, Zero_ex, PCSrc_mem)
+
     latch_ex_mem_ = latch_ex_mem(Clk, Reset,
                                  BranchAdderO_ex,
                                  AluResult_ex, Zero_ex,
@@ -296,7 +302,6 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     DataMemOut_mem = Signal(intbv(0, min=MIN, max=MAX))
 
     #branch AND gate
-    branch_and_gate = and_gate(Branch_mem, Zero_mem, PCSrc_mem)
 
     #data memory
     data_memory_ = data_memory(Clk, AluResult_mem, Data2_mem, DataMemOut_mem, MemRead_mem, MemWrite_mem, mem=data_mem)
@@ -360,7 +365,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
                 #ID
                 print "\n" + "." * 35 + " ID " + "." * 35 + "\n"
-                print "PcAdderO_id %i | Instruction_id %s (%i) | Nop %i" % (PcAdderOut_id, bin(Instruction_id, 32), Instruction_id, NopSignal)
+                print "Ip_id %i | Instruction_id %s (%i) | Nop %i" % (Ip_id, bin(Instruction_id, 32), Instruction_id, NopSignal)
                 print 'Op %s | Rs %i | Rt %i | Rd %i | Func %i | Addr16 %i | Addr32 %i' % \
                     (bin(Opcode_id, 6), Rs_id, Rt_id, Rd_id, Func_id, Address16_id, Address32_id)
 
@@ -376,7 +381,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                 #EX
                 print "\n" + "." * 35 + " EX " + "." * 35 + "\n"
 
-                print "PcAdderO_ex %i | BranchAdderO_ex %i " % (PcAdderOut_ex, BranchAdderO_ex)
+                print "Ip_ex %i | BranchAdderO_ex %i " % (Ip_ex, BranchAdderO_ex)
                 print "Rs %i | Rt %i | Rd %i | Func %i | Addr32 %i" % (Rs_ex, Rt_ex, Rd_ex, Func_ex, Address32_ex)
 
                 print 'Data1_ex %i | Data2_ex %i' % (Data1_ex, Data2_ex)
