@@ -23,7 +23,7 @@ def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,  # inputs of EX hazards
         1a. Rd_mem = Rs_ex
         1b. Rd_mem = Rt_ex
 
-        1a. Rd_wb = Rs_ex
+        2a. Rd_wb = Rs_ex
         2b. Rd_wb = Rt_ex
     """
 

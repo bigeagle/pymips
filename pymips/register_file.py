@@ -14,19 +14,25 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, out_data1, out_data2, depth=32):
 
-    mem = [Signal(intbv(i + 1, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(depth)]
+    mem = [Signal(intbv(i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(depth)]
     #print mem
 
     @always(clk.negedge)
     def logic():
+        mem[0] = 0
 
         if write_control == 1:
             mem[int(write_reg)].next = data_in  # .signed()
+            if read_reg1 == write_reg:
+                out_data1.next = data_in
+            if read_reg2 == write_reg:
+                out_data2.next = data_in
+        else:
+            out_data1.next = mem[int(read_reg1)]
+            out_data2.next = mem[int(read_reg2)]
 
-        out_data1.next = mem[int(read_reg1)]
-        out_data2.next = mem[int(read_reg2)]
-
-        #print 'reg:', [int(i) for i in mem][0:6]
+        print 'reg: [%d, %d, %d, %d, %d, %d, %d]' % \
+                (mem[0], mem[1], mem[2], mem[3], mem[4], mem[5], mem[6])
 
     return logic
 

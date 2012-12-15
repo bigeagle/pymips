@@ -6,11 +6,12 @@
 Datapath
 """
 
-from myhdl import Signal, always, always_comb, Simulation, \
+from myhdl import Signal, always, Simulation, \
     intbv, bin, instance, instances, now, toVHDL, traceSignals
 
 from clock_driver import clock_driver
 from program_counter import program_counter
+from pc_adder import adder
 from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
@@ -86,10 +87,8 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     ##############################
 
     Clk = Signal(intbv(0)[1:])  # internal clock
-    ClkPc = Signal(intbv(0)[1:])  # frec should be almost 1/4 clk internal
 
     clk_driver = clock_driver(Clk, clk_period)
-    clk_driver_pc = clock_driver(ClkPc, clk_period * 4)
 
     ####################
     #feedback Signals
@@ -97,7 +96,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
     # signals from and advanced stage which feeds a previous component
 
-    BranchAdderO_mem = Signal(intbv(0, min=MIN, max=MAX)[32:])
+    BranchAdderO_mem = Signal(intbv(0, min=MIN, max=MAX))
     PCSrc_mem = Signal(intbv(0)[1:])  # control of mux for program_counter on IF stage - (branch or inmediante_next)
 
     FlushOnBranch = PCSrc_mem           # 1 when beq condition is asserted => flush IF / ID / EX to discard
@@ -125,17 +124,19 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
     #PC
     NextIp = Signal(intbv(0)[32:])  # output of mux_branch - input of pc
-    pc = program_counter(Clk, NextIp, Ip, Stall)
+    pc = program_counter(Clk, input=NextIp, output=Ip, stall=Stall)
 
     #pc_adder
     INCREMENT = 1  # it's 4 in the book, but my instruction memory is organized in 32bits words, not in bytes
     PcAdderOut_if = Signal(intbv(0)[32:])  # output of pc_adder - input0 branch_adder and mux_branch
 
-    pc_adder = ALU(Signal(intbv('0010')[4:]), Ip, Signal(intbv(INCREMENT)[1:]), PcAdderOut_if, Signal(intbv(0)[1:]))  # hardwiring an ALU to works as an adder
+    #pc_adder = ALU(Signal(intbv('0010')[4:]), Ip, Signal(intbv(INCREMENT)[1:]), PcAdderOut_if, Signal(intbv(0)[1:]))  # hardwiring an ALU to works as an adder
+
+    pc_adder = adder(a=Ip, b=Signal(intbv(INCREMENT)[1:]), out=PcAdderOut_if)
 
     #mux controlling next ip branches.
 
-    mux_pc_source = mux2(PCSrc_mem, NextIp, PcAdderOut_if, BranchAdderO_mem)
+    mux_pc_source = mux2(sel=PCSrc_mem, mux_out=NextIp, chan1=PcAdderOut_if, chan2=BranchAdderO_mem)
 
     ##############################
     # IF/ID
@@ -144,7 +145,9 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     PcAdderOut_id = Signal(intbv(0)[32:])
     Instruction_id = Signal(intbv(0)[32:])
 
-    latch_if_id_ = latch_if_id(Clk, FlushOnBranch, Instruction_if, PcAdderOut_if, Instruction_id, PcAdderOut_id, Stall)
+    latch_if_id_ = latch_if_id(clk=Clk, rst=FlushOnBranch, instruction_in=Instruction_if,
+                               pc_adder_in=PcAdderOut_if, instruction_out=Instruction_id,
+                               pc_adder_out=PcAdderOut_id, stall=Stall)
 
     ##############################
     # ID
@@ -235,22 +238,25 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
 
     WrRegDest_ex = Signal(intbv(0)[32:])
 
-    forw_mux1_ = mux4(ForwardA, ForwMux1Out, Data1_ex, MuxMemO_wb, AluResult_mem)
+    forw_mux1_ = mux4(sel=ForwardA, mux_out=ForwMux1Out,
+                      chan1=Data1_ex, chan2=MuxMemO_wb, chan3=AluResult_mem)
 
-    forw_mux2_ = mux4(ForwardB, ForwMux2Out, Data2_ex, MuxMemO_wb, AluResult_mem)
+    forw_mux2_ = mux4(sel=ForwardB, mux_out=ForwMux2Out,
+                      chan1=Data2_ex, chan2=MuxMemO_wb, chan3=AluResult_mem)
 
     #2nd muxer of 2nd operand in ALU
-    mux_alu_src = mux2(ALUSrc_ex, MuxAluDataSrc_ex, ForwMux2Out, Address32_ex)
+    mux_alu_src = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex,
+                       chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    branch_adder_ = ALU(Signal(intbv('0010')[4:]), PcAdderOut_ex, Address32_ex, BranchAdderO_ex, Signal(intbv(0)[1:]))
+    branch_adder_ = adder(PcAdderOut_ex, Address32_ex, BranchAdderO_ex)
 
     #ALU Control
     AluControl = Signal(intbv('1111')[4:])  # control signal to alu
     alu_control_ = alu_control(ALUop_ex, Func_ex, AluControl)
 
     #ALU
-    alu_ = ALU(AluControl, ForwMux1Out, MuxAluDataSrc_ex, AluResult_ex, Zero_ex)
+    alu_ = ALU(control=AluControl, op1=ForwMux1Out, op2=MuxAluDataSrc_ex, out_=AluResult_ex, zero=Zero_ex)
 
     #Mux RegDestiny Control Write register between rt and rd.
     mux_wreg = mux2(RegDst_ex, WrRegDest_ex, Rt_ex, Rd_ex)
