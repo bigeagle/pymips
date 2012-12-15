@@ -25,8 +25,12 @@ def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, 
             mem[int(write_reg)].next = data_in  # .signed()
             if read_reg1 == write_reg:
                 out_data1.next = data_in
+            else:
+                out_data1.next = mem[int(read_reg1)]
             if read_reg2 == write_reg:
                 out_data2.next = data_in
+            else:
+                out_data2.next = mem[int(read_reg2)]
         else:
             out_data1.next = mem[int(read_reg1)]
             out_data2.next = mem[int(read_reg2)]

@@ -35,7 +35,7 @@ def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,  # inputs of EX hazards
             ForwardA.next = 2  # int('10', 2)
 
         #2a
-        elif RegWrite_wb == 1 and Rd_wb != 0 and Rd_mem != Rs_ex and Rd_wb == Rs_ex:
+        elif RegWrite_wb == 1 and RegWrite_mem == 0 and Rd_wb != 0 and Rd_wb == Rs_ex:
             ForwardA.next = 1  # int('01', 2)
 
         else:
@@ -46,12 +46,14 @@ def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,  # inputs of EX hazards
             ForwardB.next = 2  # int('10', 2)
 
         #2b
-        elif RegWrite_wb == 1 and Rd_wb != 0 and Rd_mem != Rt_ex and Rd_wb == Rt_ex:
+        elif RegWrite_wb == 1 and RegWrite_mem == 0 and Rd_wb != 0 and Rd_wb == Rt_ex:
             ForwardB.next = 1  # int('01', 2)
 
         else:
             ForwardB.next = 0
 
+        print "Forward: RegW_mem:%d, Rd_mem:%d, Rs_ex:%d, Rt_ex:%d, RegW_wb:%d, Rd_wb: %d" % \
+                (RegWrite_mem, Rd_mem, Rs_ex, Rt_ex, RegWrite_wb, Rd_wb)
     return hazards_control
 
 

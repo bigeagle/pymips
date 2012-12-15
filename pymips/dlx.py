@@ -279,7 +279,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:])):
     latch_ex_mem_ = latch_ex_mem(Clk, Reset,
                                  BranchAdderO_ex,
                                  AluResult_ex, Zero_ex,
-                                 Data2_ex, WrRegDest_ex,
+                                 ForwMux2Out, WrRegDest_ex,
                                  Branch_ex, MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
                                  RegWrite_ex, MemtoReg_ex,  # signals to WB pipeline stage
 
