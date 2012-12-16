@@ -14,6 +14,8 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 from myhdl.conversion import analyze
 
+from alu_control import alu_code
+
 
 def ALU(control, op1, op2, out_, zero):
     """
@@ -38,25 +40,25 @@ def ALU(control, op1, op2, out_, zero):
 
     @always_comb
     def logic_alu():
-        if control == 0:  # int('0000',2):
+        if control == alu_code._AND:  # int('0000',2):
             out_.next = op1 & op2
 
-        elif control == 1:  # int('0001',2):
+        elif control == alu_code._OR:  # int('0001',2):
             out_.next = op1 | op2
 
-        elif control == 2:  # int('0010',2):
+        elif control == alu_code._ADD:  # int('0010',2):
             out_.next = op1 + op2  # what happend if there is overflow ?
 
-        elif control == 6:  # int('0110',2):
+        elif control == alu_code._SUB:  # int('0110',2):
             out_.next = op1 - op2
 
-        elif control == 0b0111:  # int('0111',2):
+        elif control == alu_code._SLT:  # int('0111',2):
             if op1.val < op2.val:
                 out_.next = 1
             else:
                 out_.next = 0
 
-        elif control == 12:  # int('1100', 2):
+        elif control == alu_code._NOR:  # int('1100', 2):
             out_.next = ~ (op1 | op2)  # TODO check this
 
     @always_comb

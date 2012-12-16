@@ -12,6 +12,7 @@ import random
 from myhdl import Signal, delay, always_comb, always, Simulation, \
     intbv, bin, instance, instances, now, toVHDL
 
+from alu_control import alu_op_code
 
 def latch_id_ex(clk, rst,
                 pc_adder_in,
@@ -46,7 +47,7 @@ def latch_id_ex(clk, rst,
 
             #control lines
             RegDst_out.next = 0
-            ALUop_out.next = 0
+            ALUop_out.next = alu_op_code._NOP
             ALUSrc_out.next = 0
             Branch_out.next = 0
             MemRead_out.next = 0

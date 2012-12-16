@@ -10,38 +10,58 @@ ALU CONTROL
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, enum
 
+alu_code = enum(
+    '_AND',
+    '_OR',
+    '_NOR',
+    '_ADD',
+    '_SUB',
+    '_SLT',
+    encoding='binary'
+)
+
+alu_op_code = enum(
+    '_NOP',
+    '_ADDR',
+    '_RFORMAT',
+    '_BRANCH',
+    encoding='binary'
+)
 
 def alu_control(aluop, funct_field, control_out):
 
     @always_comb
     def logic():
-        if not aluop[0] and not aluop[1]:
-            control_out.next = intbv('0010')
+        if aluop == alu_op_code._NOP:
+            control_out.next = alu_code._ADD
 
-        elif aluop[0]:
-            control_out.next = intbv('0110')
+        if aluop == alu_op_code._ADDR:
+            control_out.next = alu_code._ADD
 
-        elif aluop[1]:
+        elif aluop == alu_op_code._BRANCH:
+            control_out.next = alu_code._SUB
+
+        elif aluop == alu_op_code._RFORMAT :
 
             if bin(funct_field[3:], 4) == '0000':
-                control_out.next = intbv('0010')
+                control_out.next = alu_code._ADD
 
             elif bin(funct_field[3:], 4) == '0010':
-                control_out.next = intbv('0110')
+                control_out.next = alu_code._SUB
 
             elif bin(funct_field[3:], 4) == '0100':
-                control_out.next = intbv('0000')
+                control_out.next = alu_code._AND
 
             elif bin(funct_field[3:], 4) == '0101':
-                control_out.next = intbv('0001')
+                control_out.next = alu_code._OR
 
             elif bin(funct_field[3:], 4) == '1010':
-                control_out.next = intbv('0111')
+                control_out.next = alu_code._SLT
 
             else:
-                control_out.next = intbv(0)
+                control_out.next = alu_code._AND
         #else:
         #    control_out.next = intbv(0)
 

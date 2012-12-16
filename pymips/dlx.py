@@ -16,7 +16,7 @@ from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
 
-from alu_control import alu_control
+from alu_control import alu_control, alu_code, alu_op_code
 from and_gate import sync_and_gate
 from control import control
 from register_file import register_file
@@ -177,7 +177,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
     RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, MemRead_id, MemWrite_id, Branch_id = signals_1bit
 
-    ALUop_id = Signal(intbv(0)[2:])
+    ALUop_id = Signal(alu_op_code._NOP)
 
     control_ = control(Opcode_id, RegDst_id, Branch_id, MemRead_id,
                        MemtoReg_id, ALUop_id, MemWrite_id, ALUSrc_id, RegWrite_id, NopSignal, Stall)
@@ -196,7 +196,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
     RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, MemRead_ex, MemWrite_ex, Branch_ex = signals_1bit
 
-    ALUop_ex = Signal(intbv(0)[2:])
+    ALUop_ex = Signal(alu_op_code._NOP)
 
     Data1_ex = Signal(intbv(0, min=MIN, max=MAX))
     Data2_ex = Signal(intbv(0, min=MIN, max=MAX))
@@ -255,7 +255,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     branch_adder_ = adder(Ip_ex, Address32_ex, BranchAdderO_ex)
 
     #ALU Control
-    AluControl = Signal(intbv('1111')[4:])  # control signal to alu
+    AluControl = Signal(alu_code._AND)  # control signal to alu
     alu_control_ = alu_control(ALUop_ex, Func_ex, AluControl)
 
     #ALU
@@ -372,7 +372,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                 print 'Data1 %i | Data2 %i' % (Data1_id, Data2_id)
                 print '-->CONTROL'
                 print 'RegDst %i  ALUop %s  ALUSrc %i | Branch %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
-                    (RegDst_id, bin(ALUop_id, 2), ALUSrc_id, Branch_id, MemRead_id, MemWrite_id, RegWrite_id, MemtoReg_id)
+                    (RegDst_id, ALUop_id, ALUSrc_id, Branch_id, MemRead_id, MemWrite_id, RegWrite_id, MemtoReg_id)
 
                 print 'Stall --> %i' % Stall
 
@@ -391,10 +391,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
                 print '-->CONTROL'
                 print 'RegDst %i  ALUop %s  ALUSrc %i | Branch %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
-                    (RegDst_ex, bin(ALUop_ex, 2), ALUSrc_ex, Branch_ex, MemRead_ex, MemWrite_ex, RegWrite_ex, MemtoReg_ex)
+                    (RegDst_ex, ALUop_ex, ALUSrc_ex, Branch_ex, MemRead_ex, MemWrite_ex, RegWrite_ex, MemtoReg_ex)
 
                 print '--> ALU'
-                print 'MuxAluDataSrc %i  | AluCtrl %s | AluResult_ex %i | Zero_ex %i' % (MuxAluDataSrc_ex, bin(AluControl, 4), AluResult_ex, Zero_ex)
+                print 'MuxAluDataSrc %i  | AluCtrl %s | AluResult_ex %i | Zero_ex %i' % (MuxAluDataSrc_ex, AluControl, AluResult_ex, Zero_ex)
                 print 'WrRegDest_ex %i' % WrRegDest_ex
 
             if True:  # if now () > 6:
