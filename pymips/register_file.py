@@ -8,7 +8,7 @@ Register file
 
 import random
 
-from myhdl import Signal, delay, always_comb, always, Simulation, \
+from myhdl import Signal, delay, always, Simulation, \
     intbv, bin, instance, instances, now, toVHDL
 
 
@@ -19,7 +19,7 @@ def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, 
 
     @always(clk.negedge)
     def logic():
-        mem[0] = 0
+        mem[0].next = 0
 
         if write_control == 1:
             mem[int(write_reg)].next = data_in  # .signed()
@@ -35,8 +35,8 @@ def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, 
             out_data1.next = mem[int(read_reg1)]
             out_data2.next = mem[int(read_reg2)]
 
-        #print 'reg: [%d, %d, %d, %d, %d, %d, %d]' % \
-        #        (mem[0], mem[1], mem[2], mem[3], mem[4], mem[5], mem[6])
+        print 'reg: [%d, %d, %d, %d, %d, %d, %d]' % (
+            mem[0], mem[1], mem[2], mem[3], mem[4], mem[5], mem[6])
 
     return logic
 

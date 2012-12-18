@@ -11,11 +11,13 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 from alu_control import alu_op_code
 
+
 def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
-            MemWrite, ALUSrc, RegWrite, NopSignal=Signal(intbv(0)[1:]), Stall=Signal(intbv(0)[1:])):
+            MemWrite, ALUSrc, RegWrite, NopSignal, Stall):
     """
     opcode -- 6bit opcode field from instruction
     RegDst, ALUSrc, MemtoReg -- 1bit signals to control multiplexors
+    ALUSrc -- 1: Immediate Num, 0: Register/Forwarded
     RegWrite, MemRead, MemWrite -- 1bit signals to control reads and writes
                                    in registers and memory
     Branch -- 1bit signal to determining whether to possibly branch
@@ -46,6 +48,27 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 Branch.next = 0
                 ALUop.next = alu_op_code._RFORMAT
 
+            #add
+            if opcode == 0b001000:  # ADDI
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                ALUop.next = alu_op_code._ADD
+
+            if opcode == 0b001001:  # ADDIU
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                ALUop.next = alu_op_code._ADD
+
             elif opcode == 0x23:  # lw
                 RegDst.next = 0
                 ALUSrc.next = 1
@@ -54,7 +77,7 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 1
                 MemWrite.next = 0
                 Branch.next = 0
-                ALUop.next = alu_op_code._ADDR
+                ALUop.next = alu_op_code._ADD
 
             elif opcode == 0x2b:  # sw
                 ALUSrc.next = 1
@@ -62,7 +85,7 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 1
                 Branch.next = 0
-                ALUop.next = alu_op_code._ADDR
+                ALUop.next = alu_op_code._ADD
 
             elif opcode == 0x04:  # beq
                 ALUSrc.next = 0

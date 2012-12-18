@@ -25,17 +25,6 @@ def ALU(control, op1, op2, out_, zero):
     out: ALU result. 32bits
     zero: zero detector. ``1`` when out is 0.
 
-    =============  =======================
-     ALU control    Function
-    =============  =======================
-     0000           AND
-     0001           OR
-     0010           add
-     0110           substract
-     0111           set on less than
-     1100           NOR
-    =============  =======================
-
     """
 
     @always_comb

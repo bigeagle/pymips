@@ -1,12 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding:utf-8 -*-
 
-#import sys
-#sys.path.insert(0, '../')
+import sys
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+
+sys.path.insert(0, ROOT)
 
 import unittest
 
@@ -70,6 +71,34 @@ class DLXTestBench(unittest.TestCase):
         check = test()
         sim = Simulation(dlx_instance, check)
         sim.run(40)
+
+    def test_immediate_sign(self):
+            dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test4.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+            def test():
+                yield delay(10)
+                self.assertEqual(self.reg_mem[1].val, 6)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[2].val, 19)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[1].val, 22)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[5].val, 54)
+                yield delay(2)
+                self.assertEqual(self.data_mem[23].val, 22)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[4].val, 22)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[1].val, 21)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[1].val, -32490)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[1].val, -65001)
+
+            check = test()
+            sim = Simulation(dlx_instance, check)
+            sim.run(25)
+
+
 
 def main():
     unittest.main()

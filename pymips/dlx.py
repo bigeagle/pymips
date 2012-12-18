@@ -11,7 +11,7 @@ from myhdl import Signal, always, Simulation, \
 
 from clock_driver import clock_driver
 from program_counter import program_counter
-from pc_adder import adder
+from adder import adder
 from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
@@ -39,7 +39,6 @@ SIM_TIME = 40  # time to simulation.
 
 DEBUG = False  # set to false to convert
 
-import sys
 
 MIN = -(2 ** 31)
 MAX = 2 ** 31 - 1
@@ -134,17 +133,14 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     mux_pc_source = mux2(sel=PCSrc_mem, mux_out=NextIp, chan1=PcAdderOut_if, chan2=BranchAdderO_mem)
 
-
     pc = program_counter(Clk, input=NextIp, output=Ip, stall=Stall)
 
     Instruction_if = Signal(intbv(0)[32:])  # 32 bits instruction line.
     im = instruction_memory(Ip, Instruction_if, program)
 
-
     ##############################
     # IF/ID
     ##############################
-
     Ip_id = Signal(intbv(0)[32:])
     Instruction_id = Signal(intbv(0)[32:])
 
@@ -230,7 +226,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     # EX
     ##############################
-    BranchAdderO_ex = Signal(intbv(0, min=MIN, max=MAX)[32:])
+    BranchAdderO_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     Zero_ex = Signal(intbv(0)[1:])
     AluResult_ex = Signal(intbv(0, min=MIN, max=MAX))
@@ -444,7 +440,7 @@ def testBench(args):
 
 def main(test=False):
     import argparse
-    parser = argparse.ArgumentParser(description = 'A simple mips')
+    parser = argparse.ArgumentParser(description='A simple mips')
     parser.add_argument('--debug', action='store_true', help='print debug information')
     parser.add_argument('--vcd', action='store_true', help='export vcd file')
     parser.add_argument('--to-vhdl', action='store_true', help='export to VHDL')

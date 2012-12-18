@@ -19,16 +19,20 @@ alu_code = enum(
     '_ADD',
     '_SUB',
     '_SLT',
+    '_LUI',
     encoding='binary'
 )
 
 alu_op_code = enum(
     '_NOP',
-    '_ADDR',
+    '_ADD',
+    '_SUB',
+    '_LUI',
     '_RFORMAT',
     '_BRANCH',
     encoding='binary'
 )
+
 
 def alu_control(aluop, funct_field, control_out):
 
@@ -37,13 +41,16 @@ def alu_control(aluop, funct_field, control_out):
         if aluop == alu_op_code._NOP:
             control_out.next = alu_code._ADD
 
-        if aluop == alu_op_code._ADDR:
+        elif aluop == alu_op_code._ADD:
             control_out.next = alu_code._ADD
 
         elif aluop == alu_op_code._BRANCH:
             control_out.next = alu_code._SUB
 
-        elif aluop == alu_op_code._RFORMAT :
+        elif aluop == alu_op_code._LUI:
+            control_out.next = alu_code._LUI
+
+        elif aluop == alu_op_code._RFORMAT:
 
             if bin(funct_field[3:], 4) == '0000':
                 control_out.next = alu_code._ADD
