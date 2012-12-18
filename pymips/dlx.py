@@ -206,7 +206,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     Address32_ex = Signal(intbv(0, min=MIN, max=MAX))
 
-    latch_id_ex_ = latch_id_ex(Clk, FlushOnBranch,
+    latch_id_ex_ = latch_id_ex(Clk, Reset,
                                Ip_id,
                                Data1_id, Data2_id, Address32_id,
                                Rs_id, Rt_id, Rd_id, Func_id,
@@ -232,7 +232,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Zero_ex = Signal(intbv(0)[1:])
     AluResult_ex = Signal(intbv(0, min=MIN, max=MAX))
 
-    ForwMux1Out, ForwMux2Out, ALUIn1, ALUIn2 = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(4)]  # Output of forw_mux1 and forw_mux2
+    ForwMux1Out, ForwMux2Out, ALUFout1, ALUFout2, ALUIn1, ALUIn2 = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(6)]  # Output of forw_mux1 and forw_mux2
 
     MuxAluDataSrc_ex = Signal(intbv(0, min=MIN, max=MAX))
 
@@ -245,30 +245,35 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                       chan1=Data2_ex, chan2=MuxMemO_wb, chan3=AluResult_mem)
 
     #2nd muxer of 2nd operand in ALU
-    mux_alu_src = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex,
+    mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex,
                        chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    branch_adder_ = adder(Ip_ex, Address32_ex, BranchAdderO_ex)
+    branch_adder_ = adder(Ip_ex, Address32_ex, BranchAdderO_ex, debug=True)
 
     #ALU Control
     AluControl = Signal(alu_code._AND)  # control signal to alu
     alu_control_ = alu_control(ALUop_ex, Func_ex, AluControl)
 
     #ALU Front
-    Alu_front_ = alu_front(ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUIn1, ALUIn2)
+    Alu_front_ = alu_front(Clk, ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2)
 
-    #ALU
+    mux_alu_src1_ = mux2(sel=Branch_ex, mux_out=ALUIn1, chan1=ALUFout1, chan2=ForwMux1Out)
+    mux_alu_src2_ = mux2(sel=Branch_ex, mux_out=ALUIn2, chan1=ALUFout2, chan2=MuxAluDataSrc_ex)
+
     alu_ = ALU(control=AluControl, op1=ALUIn1, op2=ALUIn2, out_=AluResult_ex, zero=Zero_ex)
+
+    #branch_detect
+
 
     #Mux RegDestiny Control Write register between rt and rd.
     mux_wreg = mux2(RegDst_ex, WrRegDest_ex, Rt_ex, Rd_ex)
 
+    branch_and_gate = sync_and_gate(Clk, Branch_ex, Zero_ex, PCSrc_mem)
+
     ##############################
     # EX/MEM
     ##############################
-    #BranchAdderO_mem = Signal(intbv(0, min=MIN, max=MAX))
-
     Zero_mem = Signal(intbv(0)[1:])
 
     Data2_mem = Signal(intbv(0, min=MIN, max=MAX))
@@ -278,8 +283,6 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     #control signals
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(5)]
     MemtoReg_mem, RegWrite_mem, MemRead_mem, MemWrite_mem, Branch_mem = signals_1bit
-
-    branch_and_gate = sync_and_gate(Clk, Branch_ex, Zero_ex, PCSrc_mem)
 
     latch_ex_mem_ = latch_ex_mem(Clk, Reset,
                                  BranchAdderO_ex,
@@ -294,6 +297,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                                  Branch_mem, MemRead_mem, MemWrite_mem,  # signals to MEM pipeline stage
                                  RegWrite_mem, MemtoReg_mem,  # signals to WB pipeline stage
                                  )
+
 
     ##############################
     # MEM
@@ -359,13 +363,13 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
             #IF
             print "\n" + "." * 35 + " IF " + "." * 35 + "\n"
             print "PcAdderOut_if %i | BranchAdderO_mem %i | PCSrc_mem %i | NextIp %i | Ip %i" % (PcAdderOut_if, BranchAdderO_mem, PCSrc_mem, NextIp, Ip)
-            print 'Instruction_if %s (%i)' % (bin(Instruction_if, 32), Instruction_if)
+            print 'Instruction_if %s (%x)' % (bin(Instruction_if, 32), Instruction_if)
 
             if True:  # now () > 2:
 
                 #ID
                 print "\n" + "." * 35 + " ID " + "." * 35 + "\n"
-                print "Ip_id %i | Instruction_id %s (%i) | Nop %i" % (Ip_id, bin(Instruction_id, 32), Instruction_id, NopSignal)
+                print "Ip_id %i | Instruction_id %s (%x) | Nop %i" % (Ip_id, bin(Instruction_id, 32), Instruction_id, NopSignal)
                 print 'Op %s | Rs %i | Rt %i | Rd %i | Func %i | Addr16 %i | Addr32 %i' % \
                     (bin(Opcode_id, 6), Rs_id, Rt_id, Rd_id, Func_id, Address16_id, Address32_id)
 

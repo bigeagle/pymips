@@ -3,7 +3,7 @@
 from myhdl import always_comb
 
 
-def adder(a, b, out):
+def adder(a, b, out, debug=False):
     """
     ip: current IP
     increment: IP increment step

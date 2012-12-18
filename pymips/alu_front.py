@@ -6,7 +6,7 @@ from myhdl import always, always_comb, intbv, bin
 from alu_control import alu_op_code
 
 
-def alu_front(aluop, op1, op2, out_1, out_2):
+def alu_front(clk, aluop, op1, op2, out_1, out_2):
     """
     aluop : 4 bit aluop/selector vector.
     op1: operator 1. 32bits
@@ -16,7 +16,7 @@ def alu_front(aluop, op1, op2, out_1, out_2):
 
     """
 
-    @always_comb
+    @always(clk.negedge)
     def logic():
         if aluop == alu_op_code._ORI:  # ORI
             out_1.next = op1

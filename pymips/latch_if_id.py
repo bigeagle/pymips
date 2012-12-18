@@ -30,7 +30,7 @@ def latch_if_id(clk, rst, instruction_in, ip_in, instruction_out, ip_out, stall=
     @always(clk.posedge)
     def latch():
         if rst == 1:
-            # print "latch_if_id: Reset %d, %d" % (ip_out, ip_in)
+            #print "latch_if_id: Reset %d, %d" % (ip_out, ip_in)
             instruction_out.next = 0
             ip_out.next = 0
 
@@ -38,7 +38,6 @@ def latch_if_id(clk, rst, instruction_in, ip_in, instruction_out, ip_out, stall=
             if not stall:
                 instruction_out.next = instruction_in
                 ip_out.next = ip_in
-
     return latch
 
 

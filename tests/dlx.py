@@ -66,10 +66,13 @@ class DLXTestBench(unittest.TestCase):
             self.assertEqual(self.reg_mem[3].val, 7)
             yield delay(2)
             self.assertEqual(self.reg_mem[5].val, 2)
-            yield delay(8)
+            yield delay(4)
+            self.assertEqual(self.reg_mem[1].val, 11)
+            yield delay(6)
             self.assertEqual(self.reg_mem[5].val, 4)
             yield delay(10)
-            self.assertEqual(self.reg_mem[5].val, 20)
+            self.assertEqual(self.reg_mem[1].val, 13)
+            self.assertEqual(self.reg_mem[5].val, 36)
 
         check = test()
         sim = Simulation(dlx_instance, check)
@@ -102,24 +105,24 @@ class DLXTestBench(unittest.TestCase):
             sim = Simulation(dlx_instance, check)
             sim.run(25)
 
-    #def test_ori_andi(self):
-    #    dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test5.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+    def test_ori_andi(self):
+        dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test5.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
 
-    #    def test():
-    #        yield delay(10)
-    #        self.assertEqual(self.reg_mem[1].val, 0)
-    #        yield delay(4)
-    #        self.assertEqual(self.reg_mem[1].val, 65536)
-    #        yield delay(2)
-    #        self.assertEqual(self.reg_mem[1].val, 69571)
-    #        yield delay(2)
-    #        self.assertEqual(self.data_mem[3].val, 69571)
-    #        yield delay(2)
-    #        self.assertEqual(self.reg_mem[1], 1)
+        def test():
+            yield delay(10)
+            self.assertEqual(self.reg_mem[1].val, 0)
+            yield delay(4)
+            self.assertEqual(self.reg_mem[1].val, 65536)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[1].val, 69571)
+            yield delay(2)
+            self.assertEqual(self.data_mem[3].val, 69571)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[1], 1)
 
-    #    check = test()
-    #    sim = Simulation(dlx_instance, check)
-    #    sim.run(30)
+        check = test()
+        sim = Simulation(dlx_instance, check)
+        sim.run(30)
 
 
 def main():

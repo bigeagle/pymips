@@ -41,6 +41,7 @@ def instruction_memory(address, instruction, program=None):
 
     @always_comb
     def logic():
+            #print "Address:", address
             instruction.next = ROM[int(address)]
     return logic
 

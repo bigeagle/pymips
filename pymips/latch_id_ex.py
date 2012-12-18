@@ -12,7 +12,8 @@ import random
 from myhdl import Signal, delay, always_comb, always, Simulation, \
     intbv, bin, instance, instances, now, toVHDL
 
-from alu_control import alu_op_code
+#from alu_control import alu_op_code
+
 
 def latch_id_ex(clk, rst,
                 pc_adder_in,
@@ -35,26 +36,6 @@ def latch_id_ex(clk, rst,
 
     @always(clk.posedge)
     def latch():
-        if rst == 1:
-            pc_adder_out.next = 0
-            data1_out.next = 0
-            data2_out.next = 0
-            address32_out.next = 0
-            rt_out.next = 0
-            rs_out.next = 0
-            rd_out.next = 0
-            func_out.next = 0
-
-            #control lines
-            RegDst_out.next = 0
-            ALUop_out.next = alu_op_code._NOP
-            ALUSrc_out.next = 0
-            Branch_out.next = 0
-            MemRead_out.next = 0
-            MemWrite_out.next = 0
-            RegWrite_out.next = 0
-            MemtoReg_out.next = 0
-        else:
             pc_adder_out.next = pc_adder_in  # .signed()
             data1_out.next = data1_in  # .signed()
             data2_out.next = data2_in  # .signed()
