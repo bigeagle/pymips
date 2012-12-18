@@ -15,9 +15,10 @@ from adder import adder
 from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
+from alu_front import alu_front
 
 from alu_control import alu_control, alu_code, alu_op_code
-from and_gate import sync_and_gate
+from and_gate import sync_and_gate, and_gate
 from control import control
 from register_file import register_file
 from sign_extender import sign_extend
@@ -164,11 +165,6 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     instruction_decoder_ = instruction_dec(Instruction_id, Opcode_id, Rs_id, Rt_id, Rd_id, Shamt_id, Func_id, Address16_id, NopSignal)
 
-    #sign extend
-    Address32_id = Signal(intbv(0, min=MIN, max=MAX))
-
-    sign_extend_ = sign_extend(Address16_id, Address32_id)
-
     #CONTROL
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
     RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, MemRead_id, MemWrite_id, Branch_id = signals_1bit
@@ -177,6 +173,11 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     control_ = control(Opcode_id, RegDst_id, Branch_id, MemRead_id,
                        MemtoReg_id, ALUop_id, MemWrite_id, ALUSrc_id, RegWrite_id, NopSignal, Stall)
+
+    #sign extend
+    Address32_id = Signal(intbv(0, min=MIN, max=MAX))
+
+    sign_extend_ = sign_extend(Address16_id, Address32_id)
 
     #REGISTER FILE
     Data1_id = Signal(intbv(0, min=MIN, max=MAX))
@@ -231,7 +232,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Zero_ex = Signal(intbv(0)[1:])
     AluResult_ex = Signal(intbv(0, min=MIN, max=MAX))
 
-    ForwMux1Out, ForwMux2Out = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(2)]  # Output of forw_mux1 and forw_mux2
+    ForwMux1Out, ForwMux2Out, ALUIn1, ALUIn2 = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(4)]  # Output of forw_mux1 and forw_mux2
 
     MuxAluDataSrc_ex = Signal(intbv(0, min=MIN, max=MAX))
 
@@ -254,8 +255,11 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     AluControl = Signal(alu_code._AND)  # control signal to alu
     alu_control_ = alu_control(ALUop_ex, Func_ex, AluControl)
 
+    #ALU Front
+    Alu_front_ = alu_front(ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUIn1, ALUIn2)
+
     #ALU
-    alu_ = ALU(control=AluControl, op1=ForwMux1Out, op2=MuxAluDataSrc_ex, out_=AluResult_ex, zero=Zero_ex)
+    alu_ = ALU(control=AluControl, op1=ALUIn1, op2=ALUIn2, out_=AluResult_ex, zero=Zero_ex)
 
     #Mux RegDestiny Control Write register between rt and rd.
     mux_wreg = mux2(RegDst_ex, WrRegDest_ex, Rt_ex, Rd_ex)

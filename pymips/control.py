@@ -22,6 +22,7 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                                    in registers and memory
     Branch -- 1bit signal to determining whether to possibly branch
     ALUop -- 2bit control signal for the ALU
+    Signed -- whether immediate num is extended signed or unsigned
     """
 
     @always_comb
@@ -68,6 +69,36 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemWrite.next = 0
                 Branch.next = 0
                 ALUop.next = alu_op_code._ADD
+
+            if opcode == 0b001111:  # LUI
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                ALUop.next = alu_op_code._LUI
+
+            if opcode == 0b001101:  # ORI
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                ALUop.next = alu_op_code._ORI
+
+            if opcode == 0b001100:  # ORI
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                ALUop.next = alu_op_code._ANDI
 
             elif opcode == 0x23:  # lw
                 RegDst.next = 0

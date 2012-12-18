@@ -19,7 +19,6 @@ alu_code = enum(
     '_ADD',
     '_SUB',
     '_SLT',
-    '_LUI',
     encoding='binary'
 )
 
@@ -28,6 +27,8 @@ alu_op_code = enum(
     '_ADD',
     '_SUB',
     '_LUI',
+    '_ORI',
+    '_ANDI',
     '_RFORMAT',
     '_BRANCH',
     encoding='binary'
@@ -41,29 +42,40 @@ def alu_control(aluop, funct_field, control_out):
         if aluop == alu_op_code._NOP:
             control_out.next = alu_code._ADD
 
-        elif aluop == alu_op_code._ADD:
+        elif aluop == alu_op_code._ADD:  # ADDI
             control_out.next = alu_code._ADD
 
-        elif aluop == alu_op_code._BRANCH:
+        elif aluop == alu_op_code._BRANCH:  # BRANCH
             control_out.next = alu_code._SUB
 
-        elif aluop == alu_op_code._LUI:
-            control_out.next = alu_code._LUI
+        elif aluop == alu_op_code._LUI:  # LUI
+            control_out.next = alu_code._ADD
+
+        elif aluop == alu_op_code._ORI:  # ORI
+            control_out.next = alu_code._OR
+
+        elif aluop == alu_op_code._ANDI:  # ANDI
+            control_out.next = alu_code._AND
 
         elif aluop == alu_op_code._RFORMAT:
 
+            # ADD
             if bin(funct_field[3:], 4) == '0000':
                 control_out.next = alu_code._ADD
 
+            # SUB
             elif bin(funct_field[3:], 4) == '0010':
                 control_out.next = alu_code._SUB
 
+            # AND
             elif bin(funct_field[3:], 4) == '0100':
                 control_out.next = alu_code._AND
 
+            # OR
             elif bin(funct_field[3:], 4) == '0101':
                 control_out.next = alu_code._OR
 
+            # SLT
             elif bin(funct_field[3:], 4) == '1010':
                 control_out.next = alu_code._SLT
 

@@ -22,6 +22,7 @@ class DLXTestBench(unittest.TestCase):
 
     def test_lw_sw(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test1.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
         def test():
             yield delay(10)
             self.assertEqual(self.reg_mem[1].val, 12)
@@ -40,6 +41,7 @@ class DLXTestBench(unittest.TestCase):
 
     def test_competition(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test2.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
         def test():
             yield delay(10)
             self.assertEqual(self.reg_mem[1].val, 5)
@@ -54,6 +56,7 @@ class DLXTestBench(unittest.TestCase):
 
     def test_branch(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test3.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
         def test():
             yield delay(10)
             self.assertEqual(self.reg_mem[1].val, 5)
@@ -72,8 +75,9 @@ class DLXTestBench(unittest.TestCase):
         sim = Simulation(dlx_instance, check)
         sim.run(40)
 
-    def test_immediate_sign(self):
+    def test_immediate(self):
             dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test4.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
             def test():
                 yield delay(10)
                 self.assertEqual(self.reg_mem[1].val, 6)
@@ -98,6 +102,24 @@ class DLXTestBench(unittest.TestCase):
             sim = Simulation(dlx_instance, check)
             sim.run(25)
 
+    #def test_ori_andi(self):
+    #    dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test5.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
+    #    def test():
+    #        yield delay(10)
+    #        self.assertEqual(self.reg_mem[1].val, 0)
+    #        yield delay(4)
+    #        self.assertEqual(self.reg_mem[1].val, 65536)
+    #        yield delay(2)
+    #        self.assertEqual(self.reg_mem[1].val, 69571)
+    #        yield delay(2)
+    #        self.assertEqual(self.data_mem[3].val, 69571)
+    #        yield delay(2)
+    #        self.assertEqual(self.reg_mem[1], 1)
+
+    #    check = test()
+    #    sim = Simulation(dlx_instance, check)
+    #    sim.run(30)
 
 
 def main():
