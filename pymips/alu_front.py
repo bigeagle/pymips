@@ -8,12 +8,11 @@ from alu_control import alu_op_code
 
 def alu_front(clk, aluop, op1, op2, out_1, out_2):
     """
-    aluop : 4 bit aluop/selector vector.
+    aluop : ALU operation vector.
     op1: operator 1. 32bits
     op2: operator 2. 32bits
-    out: ALU result. 32bits
-    zero: zero detector. ``1`` when out is 0.
-
+    out_1: data send to ALU
+    out_2: data send to ALU
     """
 
     @always(clk.negedge)

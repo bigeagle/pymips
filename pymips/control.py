@@ -124,7 +124,7 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
-                ALUop.next = alu_op_code._BRANCH
+                ALUop.next = alu_op_code._BEQ
 
     return logic
 

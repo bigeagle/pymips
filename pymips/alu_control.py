@@ -30,7 +30,7 @@ alu_op_code = enum(
     '_ORI',
     '_ANDI',
     '_RFORMAT',
-    '_BRANCH',
+    '_BEQ',
     encoding='binary'
 )
 
@@ -45,7 +45,7 @@ def alu_control(aluop, funct_field, control_out):
         elif aluop == alu_op_code._ADD:  # ADDI
             control_out.next = alu_code._ADD
 
-        elif aluop == alu_op_code._BRANCH:  # BRANCH
+        elif aluop == alu_op_code._BEQ:  # BRANCH
             control_out.next = alu_code._SUB
 
         elif aluop == alu_op_code._LUI:  # LUI

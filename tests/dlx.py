@@ -37,7 +37,7 @@ class DLXTestBench(unittest.TestCase):
 
         check = test()
         sim = Simulation(dlx_instance, check)
-        sim.run(30)
+        sim.run(30, quiet=True)
 
     def test_competition(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test2.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
@@ -52,7 +52,7 @@ class DLXTestBench(unittest.TestCase):
 
         check = test()
         sim = Simulation(dlx_instance, check)
-        sim.run(30)
+        sim.run(30, quiet=True)
 
     def test_branch(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test3.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
@@ -76,7 +76,7 @@ class DLXTestBench(unittest.TestCase):
 
         check = test()
         sim = Simulation(dlx_instance, check)
-        sim.run(40)
+        sim.run(40, quiet=True)
 
     def test_immediate(self):
             dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test4.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
@@ -103,7 +103,7 @@ class DLXTestBench(unittest.TestCase):
 
             check = test()
             sim = Simulation(dlx_instance, check)
-            sim.run(25)
+            sim.run(25, quiet=True)
 
     def test_ori_andi(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test5.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
@@ -122,7 +122,7 @@ class DLXTestBench(unittest.TestCase):
 
         check = test()
         sim = Simulation(dlx_instance, check)
-        sim.run(30)
+        sim.run(30, quiet=True)
 
 
 def main():

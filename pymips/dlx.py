@@ -18,7 +18,7 @@ from alu import ALU
 from alu_front import alu_front
 
 from alu_control import alu_control, alu_code, alu_op_code
-from and_gate import sync_and_gate, and_gate
+from branch_judge import branch_judge
 from control import control
 from register_file import register_file
 from sign_extender import sign_extend
@@ -230,6 +230,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     BranchAdderO_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     Zero_ex = Signal(intbv(0)[1:])
+    Positive_ex = Signal(intbv(0)[1:])
     AluResult_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     ForwMux1Out, ForwMux2Out, ALUFout1, ALUFout2, ALUIn1, ALUIn2 = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(6)]  # Output of forw_mux1 and forw_mux2
@@ -245,8 +246,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                       chan1=Data2_ex, chan2=MuxMemO_wb, chan3=AluResult_mem)
 
     #2nd muxer of 2nd operand in ALU
-    mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex,
-                       chan1=ForwMux2Out, chan2=Address32_ex)
+    mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex, chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
     branch_adder_ = adder(Ip_ex, Address32_ex, BranchAdderO_ex, debug=True)
@@ -261,15 +261,12 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     mux_alu_src1_ = mux2(sel=Branch_ex, mux_out=ALUIn1, chan1=ALUFout1, chan2=ForwMux1Out)
     mux_alu_src2_ = mux2(sel=Branch_ex, mux_out=ALUIn2, chan1=ALUFout2, chan2=MuxAluDataSrc_ex)
 
-    alu_ = ALU(control=AluControl, op1=ALUIn1, op2=ALUIn2, out_=AluResult_ex, zero=Zero_ex)
-
-    #branch_detect
-
+    alu_ = ALU(control=AluControl, op1=ALUIn1, op2=ALUIn2, out_=AluResult_ex, zero=Zero_ex, positive=Positive_ex)
 
     #Mux RegDestiny Control Write register between rt and rd.
     mux_wreg = mux2(RegDst_ex, WrRegDest_ex, Rt_ex, Rd_ex)
 
-    branch_and_gate = sync_and_gate(Clk, Branch_ex, Zero_ex, PCSrc_mem)
+    branch_and_gate = branch_judge(Clk, ALUop_ex, Branch_ex, Zero_ex, Positive_ex, PCSrc_mem)
 
     ##############################
     # EX/MEM

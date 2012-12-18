@@ -14,6 +14,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 from myhdl.conversion import analyze
 
+from alu_control import alu_op_code
 
 def and_gate(op1, op2, out):
     """
@@ -28,16 +29,22 @@ def and_gate(op1, op2, out):
 
     return logic
 
-def sync_and_gate(clk, op1, op2, out):
+def branch_judge(clk, ALUop, branch, zero, positive, out):
     """
-    op1: operator 1.
-    op2: operator 2.
-    out: and
+    clk: clock
+    ALUop: BEQ, BGEZ, BGEZL, BGTZ, BLEZ, BLTZ, BLTZAL, BNE
+    zero: is ALU result zero?
+    positive: is ALU result positive?
+    out: judgement
     """
 
     @always(clk.negedge)
     def logic():
-        out.next = op1 & op2
+        if branch == 1:
+            if ALUop == alu_op_code._BEQ:
+                out.next = zero
+        else:
+            out.next = 0
 
     return logic
 

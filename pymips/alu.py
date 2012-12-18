@@ -17,7 +17,7 @@ from myhdl.conversion import analyze
 from alu_control import alu_code
 
 
-def ALU(control, op1, op2, out_, zero):
+def ALU(control, op1, op2, out_, zero, positive):
     """
     control : 4 bit control/selector vector.
     op1: operator 1. 32bits
@@ -56,6 +56,13 @@ def ALU(control, op1, op2, out_, zero):
             zero.next = 1
         else:
             zero.next = 0
+
+    @always_comb
+    def positive_detector():
+        if out_ > 0:
+            positive.next = 1
+        else:
+            positive.next = 0
 
     return logic_alu, zero_detector
 
