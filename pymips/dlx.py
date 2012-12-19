@@ -11,7 +11,7 @@ from myhdl import Signal, always, Simulation, \
 
 from clock_driver import clock_driver
 from program_counter import program_counter
-from adder import adder
+from adder import adder, branch_jump
 from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
@@ -36,7 +36,7 @@ from forwarding import forwarding
 from hazard_detector import hazard_detector
 
 
-SIM_TIME = 120  # time to simulation.
+SIM_TIME = 100  # time to simulation.
 
 DEBUG = False  # set to false to convert
 
@@ -159,19 +159,20 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Rd_id = Signal(intbv(0)[5:])  # instruction 15:11  - to the mux controlled by RegDst
     Shamt_id = Signal(intbv(0)[5:])  # instruction 10:6   -
     Func_id = Signal(intbv(0)[6:])  # instruction 5:0    - to ALUCtrl
+    JumpAddr_id = Signal(intbv(0)[26:])
     Address16_id = Signal(intbv(0, min=-(2 ** 15), max=2 ** 15 - 1))  # instruction 15:0   - to Sign Extend
 
     NopSignal = Signal(intbv(0)[1:])
 
-    instruction_decoder_ = instruction_dec(Instruction_id, Opcode_id, Rs_id, Rt_id, Rd_id, Shamt_id, Func_id, Address16_id, NopSignal)
+    instruction_decoder_ = instruction_dec(Instruction_id, Opcode_id, Rs_id, Rt_id, Rd_id, Shamt_id, Func_id, Address16_id, JumpAddr_id, NopSignal)
 
     #CONTROL
-    signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
-    RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, MemRead_id, MemWrite_id, Branch_id = signals_1bit
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(8)]
+    RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, MemRead_id, MemWrite_id, Branch_id, Jump_id = signals_1bit
 
     ALUop_id = Signal(alu_op_code._NOP)
 
-    control_ = control(Opcode_id, Rt_id, RegDst_id, Branch_id, MemRead_id,
+    control_ = control(Opcode_id, Rt_id, Func_id, RegDst_id, Branch_id, Jump_id, MemRead_id,
                        MemtoReg_id, ALUop_id, MemWrite_id, ALUSrc_id, RegWrite_id, NopSignal, Stall)
 
     #sign extend
@@ -190,8 +191,8 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     PcAdderOut_ex = Signal(intbv(0)[32:])
 
-    signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
-    RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, MemRead_ex, MemWrite_ex, Branch_ex = signals_1bit
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(8)]
+    RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, MemRead_ex, MemWrite_ex, Branch_ex, Jump_ex = signals_1bit
 
     ALUop_ex = Signal(alu_op_code._NOP)
 
@@ -203,25 +204,26 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Rd_ex = Signal(intbv(0)[5:])  # instruction 15:11  - to the mux controlled by RegDst
     #Shamt_ex = Signal(intbv(0)[5:])    #instruction 10:6   -
     Func_ex = Signal(intbv(0)[6:])  # instruction 5:0    - to ALUCtrl
+    JumpAddr_ex = Signal(intbv(0)[32:])
 
     Address32_ex = Signal(intbv(0, min=MIN, max=MAX))
     BranchAddr_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     latch_id_ex_ = latch_id_ex(Clk, Reset,
                                PcAdderOut_id,
-                               Data1_id, Data2_id, Address32_id,
+                               Data1_id, Data2_id, Address32_id, JumpAddr_id,
                                Rs_id, Rt_id, Rd_id, Func_id,
 
-                               RegDst_id, ALUop_id, ALUSrc_id,  # signals to EX pipeline stage
-                               Branch_id, MemRead_id, MemWrite_id,  # signals to MEM pipeline stage
+                               RegDst_id, ALUop_id, ALUSrc_id, Branch_id, Jump_id,  # signals to EX pipeline stage
+                               MemRead_id, MemWrite_id,  # signals to MEM pipeline stage
                                RegWrite_id, MemtoReg_id,  # signals to WB pipeline stage
 
                                PcAdderOut_ex,
-                               Data1_ex, Data2_ex, Address32_ex, BranchAddr_ex,
+                               Data1_ex, Data2_ex, Address32_ex, BranchAddr_ex, JumpAddr_ex,
                                Rs_ex, Rt_ex, Rd_ex, Func_ex,
 
-                               RegDst_ex, ALUop_ex, ALUSrc_ex,  # signals to EX pipeline stage
-                               Branch_ex, MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
+                               RegDst_ex, ALUop_ex, ALUSrc_ex, Branch_ex, Jump_ex,  # signals to EX pipeline stage
+                               MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
                                RegWrite_ex, MemtoReg_ex  # signals to WB pipeline stage
                                )
 
@@ -250,7 +252,8 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex, chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    branch_adder_ = adder(PcAdderOut_ex, BranchAddr_ex, BranchAdderO_ex, debug=True)
+    #branch_jump_ = adder(PcAdderOut_ex, BranchAddr_ex, BranchAdderO_ex)
+    branch_jump_ = branch_jump(Branch_ex, Jump_ex, PcAdderOut_ex, BranchAddr_ex, JumpAddr_ex, ForwMux1Out, BranchAdderO_ex)
 
     #ALU Control
     AluControl = Signal(alu_code._AND)  # control signal to alu
@@ -272,9 +275,9 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Data2Reg_ex = Signal(intbv(0, min=MIN, max=MAX))
     FinalRegWrite_ex = Signal(intbv(0)[1:])
 
-    branch_judge_ = branch_judge(Clk, ALUop_ex, Branch_ex, Zero_ex, Positive_ex, PCSrc_mem)
+    branch_judge_ = branch_judge(Clk, ALUop_ex, Branch_ex, Jump_ex, Zero_ex, Positive_ex, PCSrc_mem)
 
-    Data_2_reg_judge_ = data_reg_judge(Branch_ex, PCSrc_mem, RegWrite_ex, PcAdderOut_ex, WrRegDest_ex, AluResult_ex, RegDest_ex, Data2Reg_ex, FinalRegWrite_ex)
+    Data_2_reg_judge_ = data_reg_judge(Branch_ex, Jump_ex, PCSrc_mem, RegWrite_ex, PcAdderOut_ex, WrRegDest_ex, AluResult_ex, RegDest_ex, Data2Reg_ex, FinalRegWrite_ex)
 
     ##############################
     # EX/MEM
@@ -378,8 +381,8 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
                 print 'Data1 %i | Data2 %i' % (Data1_id, Data2_id)
                 print '-->CONTROL'
-                print 'RegDst %i  ALUop %s  ALUSrc %i | Branch %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
-                    (RegDst_id, ALUop_id, ALUSrc_id, Branch_id, MemRead_id, MemWrite_id, RegWrite_id, MemtoReg_id)
+                print 'RegDst %i  ALUop %s  ALUSrc %i | Branch %i Jump %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
+                    (RegDst_id, ALUop_id, ALUSrc_id, Branch_id, Jump_id, MemRead_id, MemWrite_id, RegWrite_id, MemtoReg_id)
 
                 print 'Stall --> %i' % Stall
 
@@ -397,8 +400,8 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                 print 'ForwMux1Out %i | ForwMux2Out %i' % (ForwMux1Out, ForwMux2Out)
 
                 print '-->CONTROL'
-                print 'RegDst %i  ALUop %s  ALUSrc %i | Branch %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
-                    (RegDst_ex, ALUop_ex, ALUSrc_ex, Branch_ex, MemRead_ex, MemWrite_ex, RegWrite_ex, MemtoReg_ex)
+                print 'RegDst %i  ALUop %s  ALUSrc %i | Branch %i  Jump %i, MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
+                    (RegDst_ex, ALUop_ex, ALUSrc_ex, Branch_ex, Jump_ex, MemRead_ex, MemWrite_ex, RegWrite_ex, MemtoReg_ex)
 
                 print '--> ALU'
                 print 'MuxAluDataSrc %i  | AluCtrl %s | AluResult_ex %i | Zero_ex %i' % (MuxAluDataSrc_ex, AluControl, AluResult_ex, Zero_ex)

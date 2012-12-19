@@ -38,7 +38,6 @@ def load_program(ROM, program=None, comment_char='#'):
     return tuple(ROM)
 
 
-
 def instruction_memory(address, instruction, program=None):
     """
     address -- the pointer defined by PC

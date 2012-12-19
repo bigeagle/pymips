@@ -17,16 +17,16 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 
 def latch_id_ex(clk, rst,
                 pc_adder_in,
-                data1_in, data2_in, address32_in,
+                data1_in, data2_in, address32_in, jumpaddr_in,
                 rs_in, rt_in, rd_in, func_in,
                 RegDst_in, ALUop_in, ALUSrc_in,  # signals to EX pipeline stage
-                Branch_in, MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
+                Branch_in, Jump_in, MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
                 RegWrite_in, MemtoReg_in,  # signals to WB pipeline stage
                 pc_adder_out,
-                data1_out, data2_out, address32_out, branch_addr32_out,
+                data1_out, data2_out, address32_out, branch_addr32_out, jumpaddr_out,
                 rs_out, rt_out, rd_out, func_out,
                 RegDst_out, ALUop_out, ALUSrc_out,
-                Branch_out, MemRead_out, MemWrite_out,
+                Branch_out, Jump_out, MemRead_out, MemWrite_out,
                 RegWrite_out, MemtoReg_out,
                 ):
     """
@@ -41,6 +41,7 @@ def latch_id_ex(clk, rst,
             data2_out.next = data2_in  # .signed()
             address32_out.next = address32_in  # .signed()
             branch_addr32_out.next = address32_in << 2
+            jumpaddr_out.next = intbv(jumpaddr_in.val)[32:]
 
             rs_out.next = rs_in
             rt_out.next = rt_in
@@ -51,6 +52,7 @@ def latch_id_ex(clk, rst,
             ALUop_out.next = ALUop_in
             ALUSrc_out.next = ALUSrc_in
             Branch_out.next = Branch_in
+            Jump_out.next = Jump_in
             MemRead_out.next = MemRead_in
             MemWrite_out.next = MemWrite_in
             RegWrite_out.next = RegWrite_in

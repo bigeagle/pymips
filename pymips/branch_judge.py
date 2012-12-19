@@ -30,7 +30,7 @@ def and_gate(op1, op2, out):
     return logic
 
 
-def branch_judge(clk, ALUop, branch, zero, positive, out):
+def branch_judge(clk, ALUop, branch, jump, zero, positive, out):
     """
     clk: clock
     ALUop: BEQ, BGEZ, BGEZL, BGTZ, BLEZ, BLTZ, BLTZAL, BNE
@@ -41,7 +41,9 @@ def branch_judge(clk, ALUop, branch, zero, positive, out):
 
     @always(clk.negedge)
     def logic():
-        if branch == 1:
+        if jump == 1:
+            out.next = 1
+        elif branch == 1:
             if ALUop == alu_op_code._BEQ:
                 out.next = zero
             elif ALUop == alu_op_code._BNE:
@@ -64,7 +66,7 @@ def branch_judge(clk, ALUop, branch, zero, positive, out):
     return logic
 
 
-def data_reg_judge(branch_if, branch_en, RegW_en, Ip, InstRegDest, AluResult, RegDest, Data2Reg, RegWrite):
+def data_reg_judge(branch_if, jump, branch_en, RegW_en, Ip, InstRegDest, AluResult, RegDest, Data2Reg, RegWrite):
     """
     branch_if: weather this is a branch instruction
     branch_en: weather to branch
@@ -78,7 +80,12 @@ def data_reg_judge(branch_if, branch_en, RegW_en, Ip, InstRegDest, AluResult, Re
     """
     @always_comb
     def logic():
-        if branch_if == 1 and RegW_en == 1:
+        if jump == 1 and RegW_en == 1:
+            RegDest.next = 31
+            Data2Reg.next = Ip + 4
+            RegWrite.next = 1
+
+        elif branch_if == 1 and RegW_en == 1:
             # set RegDest to $31 and Data2Reg IP+8
             # only if it is a branch instruction and branch has been detected
             # and it is a branch/jump and link instruction

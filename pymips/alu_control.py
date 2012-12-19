@@ -39,6 +39,10 @@ alu_op_code = enum(
     '_BLEZ',
     '_BLTZ',
     '_BLTZAL',
+    '_J',
+    '_JAL',
+    '_JALR',
+    '_JR',
     encoding='binary'
 )
 

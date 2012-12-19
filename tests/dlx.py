@@ -19,6 +19,7 @@ class DLXTestBench(unittest.TestCase):
     def setUp(self):
         self.data_mem = [Signal(intbv(2*i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(1024)]
         self.reg_mem = [Signal(intbv(i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(32)]
+        self.zreg_mem = [Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(32)]
 
     def test_lw_sw(self):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test1.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
@@ -94,6 +95,35 @@ class DLXTestBench(unittest.TestCase):
         check = test()
         sim = Simulation(dlx_instance, check)
         sim.run(120, quiet=True)
+
+    def test_jump(self):
+            dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test6.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
+            def test():
+                yield delay(10)
+                self.assertEqual(self.reg_mem[5].val, 0)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[3].val, 8)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[5].val, 4)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[2].val, -4)
+                yield delay(6)
+                self.assertEqual(self.reg_mem[31].val, 7)
+                yield delay(12)
+                self.assertEqual(self.reg_mem[5].val, 8)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[2].val, 0)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[31].val, 24)
+                yield delay(6)
+                self.assertEqual(self.reg_mem[31].val, 52)
+                yield delay(6)
+                self.assertEqual(self.reg_mem[31].val, 7)
+
+            check = test()
+            sim = Simulation(dlx_instance, check)
+            sim.run(60, quiet=True)
 
     def test_immediate(self):
             dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test4.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)

@@ -12,7 +12,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 from alu_control import alu_op_code
 
 
-def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
+def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
             MemWrite, ALUSrc, RegWrite, NopSignal, Stall):
     """
     opcode -- 6bit opcode field from instruction
@@ -35,19 +35,43 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
             MemRead.next = 0
             MemWrite.next = 0
             Branch.next = 0
+            Jump.next = 0
             ALUop.next = alu_op_code._NOP
 
         else:
 
             if opcode == 0:  # r-format
-                RegDst.next = 1
-                ALUSrc.next = 0
-                MemtoReg.next = 0
-                RegWrite.next = 1
-                MemRead.next = 0
-                MemWrite.next = 0
-                Branch.next = 0
-                ALUop.next = alu_op_code._RFORMAT
+                if func == 0b001000:
+                    RegDst.next = 0
+                    ALUSrc.next = 0
+                    MemtoReg.next = 0
+                    RegWrite.next = 0
+                    MemRead.next = 0
+                    MemWrite.next = 0
+                    Branch.next = 1
+                    Jump.next = 1
+                    ALUop.next = alu_op_code._JR
+                elif func == 0b001001:
+                    RegDst.next = 0
+                    ALUSrc.next = 0
+                    MemtoReg.next = 0
+                    RegWrite.next = 1
+                    MemRead.next = 0
+                    MemWrite.next = 0
+                    Branch.next = 1
+                    Jump.next = 1
+                    ALUop.next = alu_op_code._JALR
+
+                else:
+                    RegDst.next = 1
+                    ALUSrc.next = 0
+                    MemtoReg.next = 0
+                    RegWrite.next = 1
+                    MemRead.next = 0
+                    MemWrite.next = 0
+                    Branch.next = 0
+                    Jump.next = 0
+                    ALUop.next = alu_op_code._RFORMAT
 
             #add
             if opcode == 0b001000:  # ADDI
@@ -58,6 +82,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._ADD
 
             if opcode == 0b001001:  # ADDIU
@@ -68,6 +93,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._ADD
 
             if opcode == 0b001111:  # LUI
@@ -78,6 +104,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._LUI
 
             if opcode == 0b001101:  # ORI
@@ -88,6 +115,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._ORI
 
             if opcode == 0b001100:  # ORI
@@ -98,6 +126,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._ANDI
 
             elif opcode == 0x23:  # lw
@@ -108,6 +137,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 1
                 MemWrite.next = 0
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._ADD
 
             elif opcode == 0x2b:  # sw
@@ -116,6 +146,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 1
                 Branch.next = 0
+                Jump.next = 0
                 ALUop.next = alu_op_code._ADD
 
             # branch instructions
@@ -126,6 +157,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
+                Jump.next = 0
                 ALUop.next = alu_op_code._BEQ
 
             elif opcode == 0b000101:  # BNE
@@ -135,6 +167,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
+                Jump.next = 0
                 ALUop.next = alu_op_code._BNE
 
             elif opcode == 0x01:  # BGEZ, BGEZAL, BLTZ, BLTZAL
@@ -143,6 +176,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
+                Jump.next = 0
 
                 if Rt == 0b00001:
                     ALUop.next = alu_op_code._BGEZ
@@ -163,6 +197,7 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
+                Jump.next = 0
                 if Rt == 0b00000:
                     ALUop.next = alu_op_code._BGTZ
 
@@ -172,8 +207,28 @@ def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
+                Jump.next = 0
                 if Rt == 0b00000:
                     ALUop.next = alu_op_code._BLEZ
+
+            # Jump
+            elif opcode == 0b000010:
+                ALUSrc.next = 0
+                RegWrite.next = 0
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                Jump.next = 1
+                ALUop.next = alu_op_code._J
+
+            elif opcode == 0b000011:
+                ALUSrc.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                Jump.next = 1
+                ALUop.next = alu_op_code._J
 
     return logic
 
