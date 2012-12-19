@@ -59,12 +59,12 @@ def ALU(control, op1, op2, out_, zero, positive):
 
     @always_comb
     def positive_detector():
-        if out_ > 0:
+        if out_ >= 0:
             positive.next = 1
         else:
             positive.next = 0
 
-    return logic_alu, zero_detector
+    return logic_alu, zero_detector, positive_detector
 
 
 ### TESTBENCHS

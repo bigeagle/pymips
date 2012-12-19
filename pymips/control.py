@@ -12,7 +12,7 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 from alu_control import alu_op_code
 
 
-def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
+def control(opcode, Rt, RegDst, Branch, MemRead, MemtoReg, ALUop,
             MemWrite, ALUSrc, RegWrite, NopSignal, Stall):
     """
     opcode -- 6bit opcode field from instruction
@@ -118,13 +118,62 @@ def control(opcode, RegDst, Branch, MemRead, MemtoReg, ALUop,
                 Branch.next = 0
                 ALUop.next = alu_op_code._ADD
 
+            # branch instructions
             elif opcode == 0x04:  # beq
+                RegDst.next = 0
                 ALUSrc.next = 0
                 RegWrite.next = 0
                 MemRead.next = 0
                 MemWrite.next = 0
                 Branch.next = 1
                 ALUop.next = alu_op_code._BEQ
+
+            elif opcode == 0b000101:  # BNE
+                RegDst.next = 0
+                ALUSrc.next = 0
+                RegWrite.next = 0
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 1
+                ALUop.next = alu_op_code._BNE
+
+            elif opcode == 0x01:  # BGEZ, BGEZAL, BLTZ, BLTZAL
+                RegDst.next = 0
+                ALUSrc.next = 0
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 1
+
+                if Rt == 0b00001:
+                    ALUop.next = alu_op_code._BGEZ
+                    RegWrite.next = 0
+                elif Rt == 0b10001:
+                    ALUop.next = alu_op_code._BGEZAL
+                    RegWrite.next = 1
+                elif Rt == 0b00000:
+                    ALUop.next = alu_op_code._BLTZ
+                    RegWrite.next = 0
+                elif Rt == 0b10000:
+                    ALUop.next = alu_op_code._BLTZAL
+                    RegWrite.next = 1
+
+            elif opcode == 0b000111:  # BGTZ
+                ALUSrc.next = 0
+                RegWrite.next = 0
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 1
+                if Rt == 0b00000:
+                    ALUop.next = alu_op_code._BGTZ
+
+            elif opcode == 0b000110:  # BLEZ
+                ALUSrc.next = 0
+                RegWrite.next = 0
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 1
+                if Rt == 0b00000:
+                    ALUop.next = alu_op_code._BLEZ
 
     return logic
 

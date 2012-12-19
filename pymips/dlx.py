@@ -15,10 +15,10 @@ from adder import adder
 from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
-from alu_front import alu_front
+from alu_front import alu_front, branch_alu_front
 
 from alu_control import alu_control, alu_code, alu_op_code
-from branch_judge import branch_judge
+from branch_judge import branch_judge, data_reg_judge
 from control import control
 from register_file import register_file
 from sign_extender import sign_extend
@@ -171,7 +171,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     ALUop_id = Signal(alu_op_code._NOP)
 
-    control_ = control(Opcode_id, RegDst_id, Branch_id, MemRead_id,
+    control_ = control(Opcode_id, Rt_id, RegDst_id, Branch_id, MemRead_id,
                        MemtoReg_id, ALUop_id, MemWrite_id, ALUSrc_id, RegWrite_id, NopSignal, Stall)
 
     #sign extend
@@ -233,11 +233,11 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Positive_ex = Signal(intbv(0)[1:])
     AluResult_ex = Signal(intbv(0, min=MIN, max=MAX))
 
-    ForwMux1Out, ForwMux2Out, ALUFout1, ALUFout2, ALUIn1, ALUIn2 = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(6)]  # Output of forw_mux1 and forw_mux2
+    ForwMux1Out, ForwMux2Out, ALUFout1, ALUFout2, BALUFout1, BALUFout2, ALUIn1, ALUIn2 = [Signal(intbv(0, min=MIN, max=MAX)) for i in range(8)]  # Output of forw_mux1 and forw_mux2
 
     MuxAluDataSrc_ex = Signal(intbv(0, min=MIN, max=MAX))
 
-    WrRegDest_ex = Signal(intbv(0)[32:])
+    WrRegDest_ex = Signal(intbv(0)[5:])
 
     forw_mux1_ = mux4(sel=ForwardA, mux_out=ForwMux1Out,
                       chan1=Data1_ex, chan2=MuxMemO_wb, chan3=AluResult_mem)
@@ -257,16 +257,23 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     #ALU Front
     Alu_front_ = alu_front(Clk, ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2)
+    Branch_Alu_front_ = branch_alu_front(ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, BALUFout1, BALUFout2)
 
-    mux_alu_src1_ = mux2(sel=Branch_ex, mux_out=ALUIn1, chan1=ALUFout1, chan2=ForwMux1Out)
-    mux_alu_src2_ = mux2(sel=Branch_ex, mux_out=ALUIn2, chan1=ALUFout2, chan2=MuxAluDataSrc_ex)
+    mux_alu_src1_ = mux2(sel=Branch_ex, mux_out=ALUIn1, chan1=ALUFout1, chan2=BALUFout1)
+    mux_alu_src2_ = mux2(sel=Branch_ex, mux_out=ALUIn2, chan1=ALUFout2, chan2=BALUFout2)
 
     alu_ = ALU(control=AluControl, op1=ALUIn1, op2=ALUIn2, out_=AluResult_ex, zero=Zero_ex, positive=Positive_ex)
 
     #Mux RegDestiny Control Write register between rt and rd.
     mux_wreg = mux2(RegDst_ex, WrRegDest_ex, Rt_ex, Rd_ex)
 
-    branch_and_gate = branch_judge(Clk, ALUop_ex, Branch_ex, Zero_ex, Positive_ex, PCSrc_mem)
+    RegDest_ex = Signal(intbv(0)[5:])
+    Data2Reg_ex = Signal(intbv(0, min=MIN, max=MAX))
+    FinalRegWrite_ex = Signal(intbv(0)[1:])
+
+    branch_judge_ = branch_judge(Clk, ALUop_ex, Branch_ex, Zero_ex, Positive_ex, PCSrc_mem)
+
+    Data_2_reg_judge_ = data_reg_judge(Branch_ex, PCSrc_mem, RegWrite_ex, Ip_ex, WrRegDest_ex, AluResult_ex, RegDest_ex, Data2Reg_ex, FinalRegWrite_ex)
 
     ##############################
     # EX/MEM
@@ -283,10 +290,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     latch_ex_mem_ = latch_ex_mem(Clk, Reset,
                                  BranchAdderO_ex,
-                                 AluResult_ex, Zero_ex,
-                                 ForwMux2Out, WrRegDest_ex,
+                                 Data2Reg_ex, Zero_ex,
+                                 ForwMux2Out, RegDest_ex,
                                  Branch_ex, MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
-                                 RegWrite_ex, MemtoReg_ex,  # signals to WB pipeline stage
+                                 FinalRegWrite_ex, MemtoReg_ex,  # signals to WB pipeline stage
 
                                  BranchAdderO_mem,
                                  AluResult_mem, Zero_mem,
@@ -295,11 +302,9 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                                  RegWrite_mem, MemtoReg_mem,  # signals to WB pipeline stage
                                  )
 
-
     ##############################
     # MEM
     ##############################
-
     DataMemOut_mem = Signal(intbv(0, min=MIN, max=MAX))
 
     #branch AND gate

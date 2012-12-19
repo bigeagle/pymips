@@ -29,6 +29,7 @@ def and_gate(op1, op2, out):
 
     return logic
 
+
 def branch_judge(clk, ALUop, branch, zero, positive, out):
     """
     clk: clock
@@ -43,10 +44,64 @@ def branch_judge(clk, ALUop, branch, zero, positive, out):
         if branch == 1:
             if ALUop == alu_op_code._BEQ:
                 out.next = zero
+            elif ALUop == alu_op_code._BNE:
+                out.next = ~zero
+            elif ALUop == alu_op_code._BGEZ:
+                out.next = positive
+            elif ALUop == alu_op_code._BGEZAL:
+                out.next = positive
+            elif ALUop == alu_op_code._BLTZ:
+                out.next = ~positive
+            elif ALUop == alu_op_code._BLTZAL:
+                out.next = ~positive
+            elif ALUop == alu_op_code._BGTZ:
+                out.next = positive & (~zero)
+            elif ALUop == alu_op_code._BLEZ:
+                out.next = (~positive) | zero
         else:
             out.next = 0
 
     return logic
+
+
+def data_reg_judge(branch_if, branch_en, RegW_en, Ip, InstRegDest, AluResult, RegDest, Data2Reg, RegWrite):
+    """
+    branch_if: weather this is a branch instruction
+    branch_en: weather to branch
+    RegW_en: weather to write register
+    Ip: IP
+    InstRegDest: Reg Dest in instruction
+    ALUResult: ALU result
+    RegDest: final reg dest
+    Data2reg: final data2reg
+    RegWrite: Signal to enable RegWrite
+    """
+    @always_comb
+    def logic():
+        if branch_if == 1 and RegW_en == 1:
+            # set RegDest to $31 and Data2Reg IP+8
+            # only if it is a branch instruction and branch has been detected
+            # and it is a branch/jump and link instruction
+            if branch_en == 1:
+                RegDest.next = 31
+                Data2Reg.next = Ip + 8
+                RegWrite.next = 1
+
+            if branch_en == 0:
+                # if branch condition not satisfied, disable reg write
+                RegDest.next = InstRegDest
+                Data2Reg.next = AluResult
+                RegWrite.next = 0
+
+        else:
+            # if it is not a branch instruction, pass through reg write
+            # infomations
+            RegDest.next = InstRegDest
+            Data2Reg.next = AluResult
+            RegWrite.next = RegW_en
+
+    return logic
+
 
 ### TESTBENCHS
 

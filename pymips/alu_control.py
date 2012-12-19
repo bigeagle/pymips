@@ -30,7 +30,15 @@ alu_op_code = enum(
     '_ORI',
     '_ANDI',
     '_RFORMAT',
+    # branches
     '_BEQ',
+    '_BNE',
+    '_BGEZ',
+    '_BGEZAL',
+    '_BGTZ',
+    '_BLEZ',
+    '_BLTZ',
+    '_BLTZAL',
     encoding='binary'
 )
 

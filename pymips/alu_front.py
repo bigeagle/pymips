@@ -40,7 +40,33 @@ def alu_front(clk, aluop, op1, op2, out_1, out_2):
     return logic
 
 
+def branch_alu_front(aluop, op1, op2, out_1, out_2):
+    # branch instructions
+    @always_comb
+    def logic():
+        if aluop == alu_op_code._BGEZ:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BGEZAL:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BLTZ:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BLTZAL:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BGTZ:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BLEZ:
+            out_1.next = op1
+            out_2.next = 0
+        else:
+            out_1.next = op1
+            out_2.next = op2
 
+    return logic
 
 
 
