@@ -19,19 +19,19 @@ def alu_front(clk, aluop, op1, op2, out_1, out_2):
     def logic():
         if aluop == alu_op_code._ORI:  # ORI
             out_1.next = op1
-            out_2.next[32:16] = intbv('0000000000000000')
-            out_2.next[16:] = op2[16:]
+            #out_2.next[32:16] = intbv('0000000000000000')
+            out_2.next = intbv(bin(op2[16:], width=32))[32:]
 
         elif aluop == alu_op_code._ANDI:  # ANDI
             #print "ALU_FRONT: %s, %s" % (bin(op1, 32), bin(op2, 32))
             out_1.next = op1
-            out_2.next[32:16] = intbv('0000000000000000')
-            out_2.next[16:] = op2[16:]
+            out_2.next = intbv(bin(op2[16:], width=32))[32:]
 
         elif aluop == alu_op_code._LUI:  # LUI
             out_1.next = 0
-            out_2.next[32:16] = op2[16:]
-            out_2.next[16:] = intbv('0000000000000000')
+            #out_2.next[32:16] = op2[16:]
+            #out_2.next[16:] = intbv('0000000000000000')
+            out_2.next = op2<<16
 
         else:
             out_1.next = op1

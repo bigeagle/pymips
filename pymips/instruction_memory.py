@@ -44,7 +44,7 @@ def instruction_memory(address, instruction, program=None):
     address -- the pointer defined by PC
     instruction -- 32 bit encoded instruction
     """
-    ROM = load_program([0] * 128, program=program)
+    ROM = load_program([0] * 512, program=program)
 
     @always_comb
     def logic():

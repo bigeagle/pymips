@@ -36,7 +36,7 @@ from forwarding import forwarding
 from hazard_detector import hazard_detector
 
 
-SIM_TIME = 40  # time to simulation.
+SIM_TIME = 120  # time to simulation.
 
 DEBUG = False  # set to false to convert
 
@@ -372,7 +372,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
                 #ID
                 print "\n" + "." * 35 + " ID " + "." * 35 + "\n"
-                print "Ip_id %i | Instruction_id %s (%x) | Nop %i" % (Ip_id, bin(Instruction_id, 32), Instruction_id, NopSignal)
+                print "Ip_id %i | Instruction_id %s (%x) | Nop %i" % (PcAdderOut_id, bin(Instruction_id, 32), Instruction_id, NopSignal)
                 print 'Op %s | Rs %i | Rt %i | Rd %i | Func %i | Addr16 %i | Addr32 %i' % \
                     (bin(Opcode_id, 6), Rs_id, Rt_id, Rd_id, Func_id, Address16_id, Address32_id)
 
@@ -388,7 +388,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                 #EX
                 print "\n" + "." * 35 + " EX " + "." * 35 + "\n"
 
-                print "Ip_ex %i | BranchAdderO_ex %i " % (Ip_ex, BranchAdderO_ex)
+                print "Ip_ex %i | BranchAdderO_ex %i " % (PcAdderOut_ex, BranchAdderO_ex)
                 print "Rs %i | Rt %i | Rd %i | Func %i | Addr32 %i" % (Rs_ex, Rt_ex, Rd_ex, Func_ex, Address32_ex)
 
                 print 'Data1_ex %i | Data2_ex %i' % (Data1_ex, Data2_ex)

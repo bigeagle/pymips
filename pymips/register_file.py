@@ -14,7 +14,7 @@ from myhdl import Signal, delay, always, Simulation, \
 
 def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, out_data1, out_data2, depth=32, mem=None):
 
-    mem = mem or [Signal(intbv(i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(depth)]
+    mem = mem or [Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(depth)]
     #print mem
 
     @always(clk.negedge)
@@ -35,8 +35,7 @@ def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, 
             out_data1.next = mem[int(read_reg1)]
             out_data2.next = mem[int(read_reg2)]
 
-        print 'reg: [%d, %d, %d, %d, %d, %d, %d]' % (
-            mem[0], mem[1], mem[2], mem[3], mem[4], mem[5], mem[31])
+        #print 'reg: ', [int(i) for i in mem][0:9]
 
     return logic
 
