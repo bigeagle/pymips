@@ -142,12 +142,12 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     # IF/ID
     ##############################
-    Ip_id = Signal(intbv(0)[32:])
+    PcAdderOut_id = Signal(intbv(0)[32:])
     Instruction_id = Signal(intbv(0)[32:])
 
     latch_if_id_ = latch_if_id(clk=Clk, rst=FlushOnBranch, instruction_in=Instruction_if,
-                               ip_in=Ip, instruction_out=Instruction_id,
-                               ip_out=Ip_id, stall=Stall)
+                               ip_in=PcAdderOut_if, instruction_out=Instruction_id,
+                               ip_out=PcAdderOut_id, stall=Stall)
 
     ##############################
     # ID
@@ -188,7 +188,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     # ID/EX
     ##############################
-    Ip_ex = Signal(intbv(0)[32:])
+    PcAdderOut_ex = Signal(intbv(0)[32:])
 
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
     RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, MemRead_ex, MemWrite_ex, Branch_ex = signals_1bit
@@ -208,7 +208,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     BranchAddr_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     latch_id_ex_ = latch_id_ex(Clk, Reset,
-                               Ip_id,
+                               PcAdderOut_id,
                                Data1_id, Data2_id, Address32_id,
                                Rs_id, Rt_id, Rd_id, Func_id,
 
@@ -216,7 +216,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                                Branch_id, MemRead_id, MemWrite_id,  # signals to MEM pipeline stage
                                RegWrite_id, MemtoReg_id,  # signals to WB pipeline stage
 
-                               Ip_ex,
+                               PcAdderOut_ex,
                                Data1_ex, Data2_ex, Address32_ex, BranchAddr_ex,
                                Rs_ex, Rt_ex, Rd_ex, Func_ex,
 
@@ -250,7 +250,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex, chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    branch_adder_ = adder(Ip_ex, BranchAddr_ex, BranchAdderO_ex, debug=True)
+    branch_adder_ = adder(PcAdderOut_ex, BranchAddr_ex, BranchAdderO_ex, debug=True)
 
     #ALU Control
     AluControl = Signal(alu_code._AND)  # control signal to alu
@@ -274,7 +274,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     branch_judge_ = branch_judge(Clk, ALUop_ex, Branch_ex, Zero_ex, Positive_ex, PCSrc_mem)
 
-    Data_2_reg_judge_ = data_reg_judge(Branch_ex, PCSrc_mem, RegWrite_ex, Ip_ex, WrRegDest_ex, AluResult_ex, RegDest_ex, Data2Reg_ex, FinalRegWrite_ex)
+    Data_2_reg_judge_ = data_reg_judge(Branch_ex, PCSrc_mem, RegWrite_ex, PcAdderOut_ex, WrRegDest_ex, AluResult_ex, RegDest_ex, Data2Reg_ex, FinalRegWrite_ex)
 
     ##############################
     # EX/MEM

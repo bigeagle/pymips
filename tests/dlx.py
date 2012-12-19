@@ -59,7 +59,7 @@ class DLXTestBench(unittest.TestCase):
 
         def test():
             yield delay(10)
-            self.assertEqual(self.reg_mem[1].val, 5)
+            self.assertEqual(self.reg_mem[7].val, 5)
             yield delay(2)
             self.assertEqual(self.reg_mem[5].val, 1)
             yield delay(2)
@@ -67,11 +67,11 @@ class DLXTestBench(unittest.TestCase):
             yield delay(2)
             self.assertEqual(self.reg_mem[5].val, 2)
             yield delay(4)
-            self.assertEqual(self.reg_mem[1].val, 11)
+            self.assertEqual(self.reg_mem[7].val, 11)
             yield delay(6)
             self.assertEqual(self.reg_mem[5].val, 4)
             yield delay(10)
-            self.assertEqual(self.reg_mem[1].val, 13)
+            self.assertEqual(self.reg_mem[7].val, 13)
             self.assertEqual(self.reg_mem[5].val, 36)
 
         check = test()

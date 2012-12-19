@@ -24,9 +24,15 @@ def load_program(ROM, program=None, comment_char='#'):
     for line in open(program):
         line = line.partition(comment_char)[0]
         line = line.replace(' ', '')
-        if len(line) == 32:
+
+        if len(line) in (8, 32):
+            try:
+                t = int(line, 2)
+            except:
+                t = int(line, 16)
+            inst = "%08x" % t
             for i in range(4):
-                ROM[4*index+i] = int(line[8*i:8*(i+1)], 2)
+                ROM[4*index+i] = int(inst[2*i:2*(i+1)], 16)
             index += 1
 
     return tuple(ROM)

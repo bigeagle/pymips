@@ -84,7 +84,7 @@ def data_reg_judge(branch_if, branch_en, RegW_en, Ip, InstRegDest, AluResult, Re
             # and it is a branch/jump and link instruction
             if branch_en == 1:
                 RegDest.next = 31
-                Data2Reg.next = Ip + 8
+                Data2Reg.next = Ip + 4
                 RegWrite.next = 1
 
             if branch_en == 0:
