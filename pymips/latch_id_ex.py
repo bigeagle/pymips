@@ -23,7 +23,7 @@ def latch_id_ex(clk, rst,
                 Branch_in, MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
                 RegWrite_in, MemtoReg_in,  # signals to WB pipeline stage
                 pc_adder_out,
-                data1_out, data2_out, address32_out,
+                data1_out, data2_out, address32_out, branch_addr32_out,
                 rs_out, rt_out, rd_out, func_out,
                 RegDst_out, ALUop_out, ALUSrc_out,
                 Branch_out, MemRead_out, MemWrite_out,
@@ -40,6 +40,7 @@ def latch_id_ex(clk, rst,
             data1_out.next = data1_in  # .signed()
             data2_out.next = data2_in  # .signed()
             address32_out.next = address32_in  # .signed()
+            branch_addr32_out.next = address32_in << 2
 
             rs_out.next = rs_in
             rt_out.next = rt_in

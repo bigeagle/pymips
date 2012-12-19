@@ -25,7 +25,8 @@ def load_program(ROM, program=None, comment_char='#'):
         line = line.partition(comment_char)[0]
         line = line.replace(' ', '')
         if len(line) == 32:
-            ROM[index] = int(line, 2)
+            for i in range(4):
+                ROM[4*index+i] = int(line[8*i:8*(i+1)], 2)
             index += 1
 
     return tuple(ROM)
@@ -37,12 +38,15 @@ def instruction_memory(address, instruction, program=None):
     address -- the pointer defined by PC
     instruction -- 32 bit encoded instruction
     """
-    ROM = load_program([0] * 32, program=program)
+    ROM = load_program([0] * 128, program=program)
 
     @always_comb
     def logic():
             #print "Address:", address
-            instruction.next = ROM[int(address)]
+            instruction.next[32:24] = ROM[int(address)]
+            instruction.next[24:16] = ROM[int(address+1)]
+            instruction.next[16:8] = ROM[int(address+2)]
+            instruction.next[8:] = ROM[int(address+3)]
     return logic
 
 

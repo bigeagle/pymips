@@ -123,12 +123,12 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     NextIp = Signal(intbv(0)[32:])  # output of mux_branch - input of pc
 
     #pc_adder
-    INCREMENT = 1  # it's 4 in the book, but my instruction memory is organized in 32bits words, not in bytes
+    INCREMENT = 4  # it's 4 in the book, but my instruction memory is organized in 32bits words, not in bytes
     PcAdderOut_if = Signal(intbv(0)[32:])  # output of pc_adder - input0 branch_adder and mux_branch
 
     #pc_adder = ALU(Signal(intbv('0010')[4:]), Ip, Signal(intbv(INCREMENT)[1:]), PcAdderOut_if, Signal(intbv(0)[1:]))  # hardwiring an ALU to works as an adder
 
-    pc_adder = adder(a=Ip, b=Signal(intbv(INCREMENT)[1:]), out=PcAdderOut_if)
+    pc_adder = adder(a=Ip, b=Signal(intbv(INCREMENT)[3:]), out=PcAdderOut_if)
 
     #mux controlling next ip branches.
 
@@ -205,6 +205,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Func_ex = Signal(intbv(0)[6:])  # instruction 5:0    - to ALUCtrl
 
     Address32_ex = Signal(intbv(0, min=MIN, max=MAX))
+    BranchAddr_ex = Signal(intbv(0, min=MIN, max=MAX))
 
     latch_id_ex_ = latch_id_ex(Clk, Reset,
                                Ip_id,
@@ -216,7 +217,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                                RegWrite_id, MemtoReg_id,  # signals to WB pipeline stage
 
                                Ip_ex,
-                               Data1_ex, Data2_ex, Address32_ex,
+                               Data1_ex, Data2_ex, Address32_ex, BranchAddr_ex,
                                Rs_ex, Rt_ex, Rd_ex, Func_ex,
 
                                RegDst_ex, ALUop_ex, ALUSrc_ex,  # signals to EX pipeline stage
@@ -249,7 +250,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex, chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    branch_adder_ = adder(Ip_ex, Address32_ex, BranchAdderO_ex, debug=True)
+    branch_adder_ = adder(Ip_ex, BranchAddr_ex, BranchAdderO_ex, debug=True)
 
     #ALU Control
     AluControl = Signal(alu_code._AND)  # control signal to alu
