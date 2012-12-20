@@ -14,6 +14,8 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 MIN= - 2 ** 31
 MAX= 2 ** 31 - 1
 
+def group(lst, n):
+    return zip(*[lst[i::n] for i in range(n)])
 
 def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None):
     """
@@ -48,7 +50,13 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None
 
         elif memread == 1:
             read_data.next = mem[int(address[16:])].signed()
-        #print 'mem:', [int(i) for i in mem][0:32]
+
+        cared = mem[:96]
+        data = group(cared, 4)
+
+        string = ' '.join(map(lambda g: ''.join(map(lambda x: '%02x' % x, g[::-1])), data))
+
+        print 'mem: %s' % string
 
     return logic
 

@@ -444,13 +444,33 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     return instances()
 
 
+def load_data_memory(filename):
+    MEM = []
+
+    for line in open(filename):
+        line = line.replace(' ', '')
+
+        if len(line) == 8:
+            t = int(line, 16)
+            inst = "%08x" % t
+            for i in range(4)[::-1]:
+                byte = int(inst[2*i:2*(i+1)], 16)
+                MEM.append(Signal(intbv(byte)[8:]))
+
+    return MEM
+
+
 def testBench(args):
     global DEBUG
     DEBUG = args.debug
+
+    data_mem = load_data_memory(args.data) if args.data else None
+    program = args.program
+
     if args.vcd:
-        datapath_i = traceSignals(dlx)  # () #toVHDL(datapath)
+        datapath_i = traceSignals(dlx, program=program, data_mem=data_mem)  # () #toVHDL(datapath)
     elif args.debug:
-        datapath_i = dlx()
+        datapath_i = dlx(program=program, data_mem=data_mem)
     elif args.to_vhdl:
         toVHDL(dlx)
     elif args.to_verilog:
@@ -466,11 +486,16 @@ def main(test=False):
     parser.add_argument('--vcd', action='store_true', help='export vcd file')
     parser.add_argument('--to-vhdl', action='store_true', help='export to VHDL')
     parser.add_argument('--to-verilog', action='store_true', help='export to Verilog')
-
+    parser.add_argument('--program', help="program to load")
+    parser.add_argument('--data', help="data_mem")
+    parser.add_argument('--step', type=int, help="steps")
     args = parser.parse_args()
 
     sim = Simulation(testBench(args))
-    sim.run(SIM_TIME)
+
+    sim_time = SIM_TIME if args.step is None else args.step*2
+
+    sim.run(sim_time)
 
 
 if __name__ == '__main__':

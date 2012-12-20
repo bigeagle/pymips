@@ -87,9 +87,18 @@ def alu_control(aluop, branch, funct_field, front_sel, control_out):
                 if funct_field == 0b100000:
                     control_out.next = alu_code._ADD
                     front_sel.next = 1
+                # ADDU
+                elif funct_field == 0b100001:
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
 
                 # SUB
                 elif funct_field == 0b100010:
+                    control_out.next = alu_code._SUB
+                    front_sel.next = 1
+
+                # SUBU
+                elif funct_field == 0b100011:
                     control_out.next = alu_code._SUB
                     front_sel.next = 1
 
