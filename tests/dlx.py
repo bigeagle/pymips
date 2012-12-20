@@ -96,35 +96,6 @@ class DLXTestBench(unittest.TestCase):
         sim = Simulation(dlx_instance, check)
         sim.run(120, quiet=True)
 
-    def test_jump(self):
-            dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test6.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
-
-            def test():
-                yield delay(10)
-                self.assertEqual(self.reg_mem[5].val, 0)
-                yield delay(2)
-                self.assertEqual(self.reg_mem[3].val, 8)
-                yield delay(2)
-                self.assertEqual(self.reg_mem[5].val, 4)
-                yield delay(2)
-                self.assertEqual(self.reg_mem[2].val, -4)
-                yield delay(6)
-                self.assertEqual(self.reg_mem[31].val, 7)
-                yield delay(12)
-                self.assertEqual(self.reg_mem[5].val, 8)
-                yield delay(2)
-                self.assertEqual(self.reg_mem[2].val, 0)
-                yield delay(2)
-                self.assertEqual(self.reg_mem[31].val, 24)
-                yield delay(6)
-                self.assertEqual(self.reg_mem[31].val, 52)
-                yield delay(6)
-                self.assertEqual(self.reg_mem[31].val, 7)
-
-            check = test()
-            sim = Simulation(dlx_instance, check)
-            sim.run(60, quiet=True)
-
     def test_immediate(self):
             dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test4.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
 
@@ -166,6 +137,60 @@ class DLXTestBench(unittest.TestCase):
             self.assertEqual(self.data_mem[3].val, 69571)
             yield delay(2)
             self.assertEqual(self.reg_mem[1], 1)
+
+        check = test()
+        sim = Simulation(dlx_instance, check)
+        sim.run(30, quiet=True)
+
+    def test_jump(self):
+            dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test6.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
+            def test():
+                yield delay(10)
+                self.assertEqual(self.reg_mem[5].val, 0)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[3].val, 8)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[5].val, 4)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[2].val, -4)
+                yield delay(6)
+                self.assertEqual(self.reg_mem[31].val, 7)
+                yield delay(12)
+                self.assertEqual(self.reg_mem[5].val, 8)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[2].val, 0)
+                yield delay(2)
+                self.assertEqual(self.reg_mem[31].val, 24)
+                yield delay(6)
+                self.assertEqual(self.reg_mem[31].val, 52)
+                yield delay(6)
+                self.assertEqual(self.reg_mem[31].val, 7)
+
+            check = test()
+            sim = Simulation(dlx_instance, check)
+            sim.run(60, quiet=True)
+
+    def test_shift(self):
+        dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test7.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
+
+        def test():
+            yield delay(10)
+            self.assertEqual(self.reg_mem[5].val, 0)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[3].val, 8)
+            yield delay(4)
+            self.assertEqual(self.reg_mem[2].val, -16776978)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[7], -536863296)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[7], 60928)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[7], 133693447)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[7], -524281)
+            yield delay(2)
+            self.assertEqual(self.reg_mem[7], -65536)
 
         check = test()
         sim = Simulation(dlx_instance, check)

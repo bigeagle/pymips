@@ -1,12 +1,16 @@
 #!/usr/bin/env python2
 # -*- coding:utf-8 -*-
 
-from myhdl import always, always_comb, intbv, bin
+from myhdl import Signal, always, always_comb, intbv, bin, instances, Simulation, traceSignals, toVerilog
 
 from alu_control import alu_op_code
+from shift import shift, shift_op
+
+MIN = -2**31
+MAX = 2**31 - 1
 
 
-def alu_front(clk, aluop, op1, op2, out_1, out_2):
+def alu_front(clk, aluop, func, shamt, op1, op2, out_1, out_2):
     """
     aluop : ALU operation vector.
     op1: operator 1. 32bits
@@ -17,6 +21,7 @@ def alu_front(clk, aluop, op1, op2, out_1, out_2):
 
     @always(clk.negedge)
     def logic():
+
         if aluop == alu_op_code._ORI:  # ORI
             out_1.next = op1
             #out_2.next[32:16] = intbv('0000000000000000')
@@ -37,7 +42,7 @@ def alu_front(clk, aluop, op1, op2, out_1, out_2):
             out_1.next = op1
             out_2.next = op2
 
-    return logic
+    return instances()
 
 
 def branch_alu_front(aluop, op1, op2, out_1, out_2):
@@ -69,6 +74,133 @@ def branch_alu_front(aluop, op1, op2, out_1, out_2):
     return logic
 
 
+def shift_alu_front(func, shamt, op1, op2, out_1, out_2):
+    shift_in, shift_out = [Signal(intbv(0, min=MIN, max=MAX)) for x in range(2)]
+
+    shift_in = Signal(intbv(0, min=MIN, max=MAX))
+    shift_ctl = Signal(shift_op._NOP)
+    shift_amount = Signal(intbv(0)[5:])
+    shift_ = shift(shift_in, shift_amount, shift_ctl, shift_out)
+
+    @always_comb
+    def logic():
+        if func == 0:
+            shift_in.next = op2
+            shift_ctl.next = shift_op._LL
+            shift_amount.next = shamt
+            out_2.next = op1
+            out_1.next = shift_out
+        else:
+            out_1.next = op1
+            out_2.next = op2
+
+    return instances()
+
+
+def comb_alu_front(aluop, func, shamt, op1, op2, out_1, out_2):
+
+    shift_in, shift_out = [Signal(intbv(0, min=MIN, max=MAX)) for x in range(2)]
+    shift_ctl = Signal(shift_op._NOP)
+    shift_amount = Signal(intbv(0)[5:])
+
+    shift_ = shift(shift_in, shift_amount, shift_ctl, shift_out)
+
+    @always_comb
+    def logic():
+        if aluop == alu_op_code._RFORMAT:
+            if func == 0:
+                shift_in.next = op2
+                shift_ctl.next = shift_op._LL
+                shift_amount.next = shamt
+                out_2.next = 0
+                out_1.next = shift_out
+            elif func == 4:
+                shift_in.next = op2
+                shift_ctl.next = shift_op._LL
+                shift_amount.next = op1[5:]
+                out_2.next = 0
+                out_1.next = shift_out
+            elif func == 2:
+                shift_in.next = op2
+                shift_ctl.next = shift_op._RL
+                shift_amount.next = shamt
+                out_2.next = 0
+                out_1.next = shift_out
+            elif func == 3:
+                shift_in.next = op2
+                shift_ctl.next = shift_op._RA
+                shift_amount.next = shamt
+                out_2.next = 0
+                out_1.next = shift_out
+            elif func == 7:
+                shift_in.next = op2
+                shift_ctl.next = shift_op._RA
+                shift_amount.next = op1[5:]
+                out_2.next = 0
+                out_1.next = shift_out
+            else:
+                out_1.next = op1
+                out_2.next = op2
+
+        elif aluop == alu_op_code._BGEZ:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BGEZAL:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BLTZ:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BLTZAL:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BGTZ:
+            out_1.next = op1
+            out_2.next = 0
+        elif aluop == alu_op_code._BLEZ:
+            out_1.next = op1
+            out_2.next = 0
+        else:
+            out_1.next = op1
+            out_2.next = op2
+
+    return instances()
+
+from clock_driver import clock_driver
+
+
+def test_instance():
+    clk = Signal(intbv(0)[1:])
+    op1 = Signal(intbv(0b10110111, min=MIN, max=MAX))
+    op2 = Signal(intbv(0b10110111, min=MIN, max=MAX))
+    out_1 = Signal(intbv(0, min=MIN, max=MAX))
+    out_2 = Signal(intbv(0, min=MIN, max=MAX))
+
+    clkdriver_inst = clock_driver(clk)
+
+    shifter_ = comb_alu_front(alu_op_code._RFORMAT, Signal(0b000000), Signal(0b000111), op1, op2, out_1, out_2)
+
+    return instances()
+
+
+def main():
+    sim = Simulation(traceSignals(test_instance))
+    #sim = Simulation(testbench())
+    sim.run(20)
+
+    op1 = Signal(intbv(0b10110111, min=MIN, max=MAX))
+    op2 = Signal(intbv(0b10110111, min=MIN, max=MAX))
+    out_1 = Signal(intbv(0, min=MIN, max=MAX))
+    out_2 = Signal(intbv(0, min=MIN, max=MAX))
+    func = Signal(intbv(0)[6:])
+    shamt = Signal(intbv(0b00111)[5:])
+    opcode = Signal(alu_op_code._RFORMAT)
+
+    toVerilog(comb_alu_front, opcode, func, shamt, op1, op2, out_1, out_2)
+
+
+if __name__ == '__main__':
+    main()
 
 
 # vim: ts=4 sw=4 sts=4 expandtab

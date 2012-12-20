@@ -47,54 +47,88 @@ alu_op_code = enum(
 )
 
 
-def alu_control(aluop, funct_field, control_out):
+def alu_control(aluop, branch, funct_field, front_sel, control_out):
 
     @always_comb
     def logic():
-        if aluop == alu_op_code._NOP:
-            control_out.next = alu_code._ADD
-
-        elif aluop == alu_op_code._ADD:  # ADDI
-            control_out.next = alu_code._ADD
-
-        elif aluop == alu_op_code._BEQ:  # BRANCH
+        if branch == 1:
+            front_sel.next = 1
             control_out.next = alu_code._SUB
 
-        elif aluop == alu_op_code._LUI:  # LUI
-            control_out.next = alu_code._ADD
-
-        elif aluop == alu_op_code._ORI:  # ORI
-            control_out.next = alu_code._OR
-
-        elif aluop == alu_op_code._ANDI:  # ANDI
-            control_out.next = alu_code._AND
-
-        elif aluop == alu_op_code._RFORMAT:
-
-            # ADD
-            if bin(funct_field[3:], 4) == '0000':
+        else:
+            if aluop == alu_op_code._NOP:
                 control_out.next = alu_code._ADD
+                front_sel.next = 1
 
-            # SUB
-            elif bin(funct_field[3:], 4) == '0010':
-                control_out.next = alu_code._SUB
+            elif aluop == alu_op_code._ADD:  # ADDI
+                control_out.next = alu_code._ADD
+                front_sel.next = 1
 
-            # AND
-            elif bin(funct_field[3:], 4) == '0100':
-                control_out.next = alu_code._AND
+            elif aluop == alu_op_code._LUI:  # LUI
+                control_out.next = alu_code._ADD
+                front_sel.next = 0
 
-            # OR
-            elif bin(funct_field[3:], 4) == '0101':
+            elif aluop == alu_op_code._ORI:  # ORI
                 control_out.next = alu_code._OR
+                front_sel.next = 0
 
-            # SLT
-            elif bin(funct_field[3:], 4) == '1010':
-                control_out.next = alu_code._SLT
-
-            else:
+            elif aluop == alu_op_code._ANDI:  # ANDI
                 control_out.next = alu_code._AND
-        #else:
-        #    control_out.next = intbv(0)
+                front_sel.next = 0
+
+            elif aluop == alu_op_code._RFORMAT:
+
+                # ADD
+                if funct_field == 0b100000:
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
+
+                # SUB
+                elif funct_field == 0b100010:
+                    control_out.next = alu_code._SUB
+                    front_sel.next = 1
+
+                # AND
+                elif funct_field == 0b100100:
+                    control_out.next = alu_code._AND
+                    front_sel.next = 1
+
+                # OR
+                elif funct_field == 0b100101:
+                    control_out.next = alu_code._OR
+                    front_sel.next = 1
+
+                # SLT
+                elif funct_field == 0b101010:
+                    control_out.next = alu_code._SLT
+                    front_sel.next = 1
+
+                # SLL, SRL, SRA, SRAV, SLLV
+                elif funct_field == 0b000000:  # SLL
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
+
+                elif funct_field == 0b000010:  # SRL
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
+
+                elif funct_field == 0b000011:  # SRA
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
+
+                elif funct_field == 0b000100:  # SLLV
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
+
+                elif funct_field == 0b000111:  # SRAV
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 1
+
+                else:
+                    control_out.next = alu_code._AND
+                    front_sel.next = 1
+            #else:
+            #    control_out.next = intbv(0)
 
     return logic
 

@@ -18,15 +18,15 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 def latch_id_ex(clk, rst,
                 pc_adder_in,
                 data1_in, data2_in, address32_in, jumpaddr_in,
-                rs_in, rt_in, rd_in, func_in,
-                RegDst_in, ALUop_in, ALUSrc_in,  # signals to EX pipeline stage
-                Branch_in, Jump_in, MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
+                rs_in, rt_in, rd_in, shamt_in, func_in,
+                RegDst_in, ALUop_in, ALUSrc_in, Branch_in, Jump_in,# signals to EX pipeline stage
+                MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
                 RegWrite_in, MemtoReg_in,  # signals to WB pipeline stage
                 pc_adder_out,
                 data1_out, data2_out, address32_out, branch_addr32_out, jumpaddr_out,
-                rs_out, rt_out, rd_out, func_out,
-                RegDst_out, ALUop_out, ALUSrc_out,
-                Branch_out, Jump_out, MemRead_out, MemWrite_out,
+                rs_out, rt_out, rd_out, shamt_out, func_out,
+                RegDst_out, ALUop_out, ALUSrc_out, Branch_out, Jump_out,
+                MemRead_out, MemWrite_out,
                 RegWrite_out, MemtoReg_out,
                 ):
     """
@@ -46,6 +46,7 @@ def latch_id_ex(clk, rst,
             rs_out.next = rs_in
             rt_out.next = rt_in
             rd_out.next = rd_in
+            shamt_out.next = shamt_in
             func_out.next = func_in
 
             RegDst_out.next = RegDst_in

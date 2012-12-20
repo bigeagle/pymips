@@ -15,7 +15,7 @@ from adder import adder, branch_jump
 from instruction_memory import instruction_memory
 from instruction_decoder import instruction_dec
 from alu import ALU
-from alu_front import alu_front, branch_alu_front
+from alu_front import alu_front, comb_alu_front
 
 from alu_control import alu_control, alu_code, alu_op_code
 from branch_judge import branch_judge, data_reg_judge
@@ -202,7 +202,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     Rs_ex = Signal(intbv(0)[5:])  # instruction 25:21  - to read_reg_1
     Rt_ex = Signal(intbv(0)[5:])  # instruction 20:16  - to read_reg_2 and mux controlled by RegDst
     Rd_ex = Signal(intbv(0)[5:])  # instruction 15:11  - to the mux controlled by RegDst
-    #Shamt_ex = Signal(intbv(0)[5:])    #instruction 10:6   -
+    Shamt_ex = Signal(intbv(0)[5:])    # instruction 10:6   -
     Func_ex = Signal(intbv(0)[6:])  # instruction 5:0    - to ALUCtrl
     JumpAddr_ex = Signal(intbv(0)[32:])
 
@@ -212,7 +212,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     latch_id_ex_ = latch_id_ex(Clk, Reset,
                                PcAdderOut_id,
                                Data1_id, Data2_id, Address32_id, JumpAddr_id,
-                               Rs_id, Rt_id, Rd_id, Func_id,
+                               Rs_id, Rt_id, Rd_id, Shamt_id, Func_id,
 
                                RegDst_id, ALUop_id, ALUSrc_id, Branch_id, Jump_id,  # signals to EX pipeline stage
                                MemRead_id, MemWrite_id,  # signals to MEM pipeline stage
@@ -220,7 +220,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
                                PcAdderOut_ex,
                                Data1_ex, Data2_ex, Address32_ex, BranchAddr_ex, JumpAddr_ex,
-                               Rs_ex, Rt_ex, Rd_ex, Func_ex,
+                               Rs_ex, Rt_ex, Rd_ex, Shamt_ex, Func_ex,
 
                                RegDst_ex, ALUop_ex, ALUSrc_ex, Branch_ex, Jump_ex,  # signals to EX pipeline stage
                                MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
@@ -257,14 +257,15 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     #ALU Control
     AluControl = Signal(alu_code._AND)  # control signal to alu
-    alu_control_ = alu_control(ALUop_ex, Func_ex, AluControl)
+    AluFrontSel = Signal(intbv(0)[1:])
+    alu_control_ = alu_control(ALUop_ex, Branch_ex, Func_ex, AluFrontSel, AluControl)
 
     #ALU Front
-    Alu_front_ = alu_front(Clk, ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2)
-    Branch_Alu_front_ = branch_alu_front(ALUop_ex, ForwMux1Out, MuxAluDataSrc_ex, BALUFout1, BALUFout2)
+    Clk_Alu_front_ = alu_front(Clk, ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2)
+    Comb_Alu_front_ = comb_alu_front(ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, BALUFout1, BALUFout2)
 
-    mux_alu_src1_ = mux2(sel=Branch_ex, mux_out=ALUIn1, chan1=ALUFout1, chan2=BALUFout1)
-    mux_alu_src2_ = mux2(sel=Branch_ex, mux_out=ALUIn2, chan1=ALUFout2, chan2=BALUFout2)
+    mux_alu_src1_ = mux2(sel=AluFrontSel, mux_out=ALUIn1, chan1=ALUFout1, chan2=BALUFout1)
+    mux_alu_src2_ = mux2(sel=AluFrontSel, mux_out=ALUIn2, chan1=ALUFout2, chan2=BALUFout2)
 
     alu_ = ALU(control=AluControl, op1=ALUIn1, op2=ALUIn2, out_=AluResult_ex, zero=Zero_ex, positive=Positive_ex)
 
