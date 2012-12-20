@@ -167,8 +167,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     instruction_decoder_ = instruction_dec(Instruction_id, Opcode_id, Rs_id, Rt_id, Rd_id, Shamt_id, Func_id, Address16_id, JumpAddr_id, NopSignal)
 
     #CONTROL
-    signals_1bit = [Signal(intbv(0)[1:]) for i in range(8)]
-    RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, MemRead_id, MemWrite_id, Branch_id, Jump_id = signals_1bit
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(6)]
+    signals_2bit = [Signal(intbv(0)[2:]) for i in range(2)]
+    RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, Branch_id, Jump_id = signals_1bit
+    MemRead_id, MemWrite_id = signals_2bit
 
     ALUop_id = Signal(alu_op_code._NOP)
 
@@ -191,8 +193,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     PcAdderOut_ex = Signal(intbv(0)[32:])
 
-    signals_1bit = [Signal(intbv(0)[1:]) for i in range(8)]
-    RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, MemRead_ex, MemWrite_ex, Branch_ex, Jump_ex = signals_1bit
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(6)]
+    signals_2bit = [Signal(intbv(0)[2:]) for i in range(2)]
+    RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, Branch_ex, Jump_ex = signals_1bit
+    MemRead_ex, MemWrite_ex = signals_2bit
 
     ALUop_ex = Signal(alu_op_code._NOP)
 
@@ -290,8 +294,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     WrRegDest_mem = Signal(intbv(0)[32:])
 
     #control signals
-    signals_1bit = [Signal(intbv(0)[1:]) for i in range(5)]
-    MemtoReg_mem, RegWrite_mem, MemRead_mem, MemWrite_mem, Branch_mem = signals_1bit
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(3)]
+    signals_2bit = [Signal(intbv(0)[2:]) for i in range(2)]
+    MemtoReg_mem, RegWrite_mem, Branch_mem = signals_1bit
+    MemRead_mem, MemWrite_mem = signals_2bit
 
     latch_ex_mem_ = latch_ex_mem(Clk, Reset,
                                  BranchAdderO_ex,

@@ -9,7 +9,10 @@ Data Memory
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, concat
+
+MIN= - 2 ** 31
+MAX= 2 ** 31 - 1
 
 
 def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None):
@@ -24,18 +27,27 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None
     memread -- interface enable: read address if 1
     """
 
-    mem = mem or [Signal(intbv(2*i, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(1024)]
+    mem = mem or [Signal(intbv(0)[8:]) for i in range(4096)]
 
     #mem[6] = Signal(intbv(51, min=-(2 ** 31), max=2 ** 31 - 1))  # usefull to test load instruction directly
 
     @always(clk.negedge)
     def logic():
-        if memwrite == 1:
-            mem[int(address)].next = write_data.val
+        dw = intbv(write_data.val, min=MIN, max=MAX)
+        if memwrite == 3:
+            mem[int(address)].next = dw[8:0]
+            mem[int(address)+1].next = dw[16:8]
+            mem[int(address)+2].next = dw[24:16]
+            mem[int(address)+3].next = dw[32:24]
+
+        elif memwrite == 1:
+            mem[int(address)].next = dw[8:0]
+
+        elif memread == 3:
+            read_data.next = concat(mem[int(address)+3][8:], mem[int(address)+2][8:], mem[int(address)+1][8:], mem[int(address)][8:]).signed()
 
         elif memread == 1:
-            read_data.next = mem[int(address)]
-
+            read_data.next = mem[int(address)].signed()
         #print 'mem:', [int(i) for i in mem][0:32]
 
     return logic

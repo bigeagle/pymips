@@ -29,7 +29,7 @@ def hazard_detector(MemRead_ex, Rt_ex,
 
     @always_comb
     def logic():
-        if MemRead_ex == 1 and (Rt_ex == Rs_id or Rt_ex == Rt_id):
+        if MemRead_ex != 0 and (Rt_ex == Rs_id or Rt_ex == Rt_id):
             #stall the pipeline
             Stall.next = 1
         else:

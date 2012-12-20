@@ -134,6 +134,17 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 ALUSrc.next = 1
                 MemtoReg.next = 1
                 RegWrite.next = 1
+                MemRead.next = 3
+                MemWrite.next = 0
+                Branch.next = 0
+                Jump.next = 0
+                ALUop.next = alu_op_code._ADD
+
+            elif opcode == 0x20:  # lw
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 1
+                RegWrite.next = 1
                 MemRead.next = 1
                 MemWrite.next = 0
                 Branch.next = 0
@@ -144,7 +155,7 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 ALUSrc.next = 1
                 RegWrite.next = 0
                 MemRead.next = 0
-                MemWrite.next = 1
+                MemWrite.next = 3
                 Branch.next = 0
                 Jump.next = 0
                 ALUop.next = alu_op_code._ADD
