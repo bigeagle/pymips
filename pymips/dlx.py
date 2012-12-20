@@ -375,7 +375,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
             print sep % (int(now() / 2.0 + 0.5), now())
             #IF
             print "\n" + "." * 35 + " IF " + "." * 35 + "\n"
-            print "PcAdderOut_if %i | BranchAdderO_mem %i | PCSrc_mem %i | NextIp %i | Ip %i" % (PcAdderOut_if, BranchAdderO_mem, PCSrc_mem, NextIp, Ip)
+            print "PcAdderOut_if %i | BranchAdderO_mem %i | PCSrc_mem %i | NextIp %i | Ip %x" % (PcAdderOut_if, BranchAdderO_mem, PCSrc_mem, NextIp, Ip)
             print 'Instruction_if %s (%x)' % (bin(Instruction_if, 32), Instruction_if)
 
             if True:  # now () > 2:
@@ -450,12 +450,15 @@ def load_data_memory(filename):
     for line in open(filename):
         line = line.replace(' ', '')
 
-        if len(line) == 8:
-            t = int(line, 16)
-            inst = "%08x" % t
-            for i in range(4)[::-1]:
-                byte = int(inst[2*i:2*(i+1)], 16)
-                MEM.append(Signal(intbv(byte)[8:]))
+        t = int(line, 16)
+        inst = "%08x" % t
+        for i in range(4)[::-1]:
+            byte = int(inst[2*i:2*(i+1)], 16)
+            MEM.append(Signal(intbv(byte)[8:]))
+
+    l = len(MEM)
+    for i in range(0xf00-l):
+        MEM.append(Signal(intbv(0)[8:]))
 
     return MEM
 

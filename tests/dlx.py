@@ -12,8 +12,8 @@ sys.path.insert(0, ROOT)
 import unittest
 
 from myhdl import Signal, intbv, Simulation, delay
-from pymips.dlx import dlx
-
+from pymips.dlx import dlx, load_data_memory
+from pymips.data_memory import group, m2int
 
 class DLXTestBench(unittest.TestCase):
     def setUp(self):
@@ -222,6 +222,22 @@ class DLXTestBench(unittest.TestCase):
         check = test()
         sim = Simulation(dlx_instance, check)
         sim.run(30, quiet=True)
+
+    def test_merge_sort(self):
+        ram = load_data_memory(os.path.join(ROOT, 'programs/hash/ram.txt'))
+        dlx_instance = dlx(program=os.path.join(ROOT, 'programs/hash/rom.txt'), data_mem=ram, reg_mem=self.zreg_mem)
+
+        def test():
+            yield delay(1480*2)
+            cared = ram[-80:]
+            data = group(cared, 4)
+            string = ' '.join(map(m2int, data))
+            self.assertEqual(string, "262144 0 -645 -22 7 9 11 13 31 37 64 86 111 282 502 502 502 733 262144 0")
+            print 'stack: %s' % string
+
+        check = test()
+        sim = Simulation(dlx_instance, check)
+        sim.run(1480*2, quiet=True)
 
 
 def main():

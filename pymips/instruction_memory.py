@@ -22,7 +22,7 @@ def load_program(ROM, program=None, comment_char='#'):
         program = '../programs/simple.txt'
     index = 0
     for line in open(program):
-        line = line.partition(comment_char)[0]
+        line = line.split(comment_char)[0]
         line = line.replace(' ', '')
 
         if len(line) in (8, 32):
@@ -43,7 +43,7 @@ def instruction_memory(address, instruction, program=None):
     address -- the pointer defined by PC
     instruction -- 32 bit encoded instruction
     """
-    ROM = load_program([0] * 512, program=program)
+    ROM = load_program([0] * 2048, program=program)
 
     @always_comb
     def logic():

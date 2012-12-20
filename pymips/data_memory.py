@@ -6,6 +6,7 @@
 Data Memory
 """
 
+import struct
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
@@ -14,8 +15,15 @@ from myhdl import Signal, delay, always_comb, always, Simulation, \
 MIN= - 2 ** 31
 MAX= 2 ** 31 - 1
 
+
 def group(lst, n):
     return zip(*[lst[i::n] for i in range(n)])
+
+
+def m2int(group):
+    return "%d" % struct.unpack("<i", ''.join(map(lambda i: chr(int(i)), group)))[0]
+
+
 
 def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None):
     """
@@ -32,31 +40,35 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None
     mem = mem or [Signal(intbv(0)[8:]) for i in range(4096)]
 
     #mem[6] = Signal(intbv(51, min=-(2 ** 31), max=2 ** 31 - 1))  # usefull to test load instruction directly
+    mwidth = 12
 
     @always(clk.negedge)
     def logic():
         dw = intbv(write_data.val, min=MIN, max=MAX)
         if memwrite == 3:
-            mem[int(address[16:])].next = dw[8:0]
-            mem[int(address[16:])+1].next = dw[16:8]
-            mem[int(address[16:])+2].next = dw[24:16]
-            mem[int(address[16:])+3].next = dw[32:24]
+            mem[int(address[mwidth:])].next = dw[8:0]
+            mem[int(address[mwidth:])+1].next = dw[16:8]
+            mem[int(address[mwidth:])+2].next = dw[24:16]
+            mem[int(address[mwidth:])+3].next = dw[32:24]
 
         elif memwrite == 1:
-            mem[int(address[16:])].next = dw[8:0]
+            mem[int(address[mwidth:])].next = dw[8:0]
 
         elif memread == 3:
-            read_data.next = concat(mem[int(address[16:])+3][8:], mem[int(address[16:])+2][8:], mem[int(address[16:])+1][8:], mem[int(address[16:])][8:]).signed()
+            read_data.next = concat(mem[int(address[mwidth:])+3][8:], mem[int(address[mwidth:])+2][8:], mem[int(address[mwidth:])+1][8:], mem[int(address[mwidth:])][8:]).signed()
 
         elif memread == 1:
-            read_data.next = mem[int(address[16:])].signed()
+            read_data.next = mem[int(address[mwidth:])].signed()
 
-        cared = mem[:96]
-        data = group(cared, 4)
+        #cared = mem[:96]
+        #data = group(cared, 4)
+        #string = ' '.join(map(lambda g: ''.join(map(lambda x: '%02x' % x, g[::-1])), data))
+        #print 'mem: %s' % string
 
-        string = ' '.join(map(lambda g: ''.join(map(lambda x: '%02x' % x, g[::-1])), data))
-
-        print 'mem: %s' % string
+        #cared = mem[-80:]
+        #data = group(cared, 4)
+        #string = ' '.join(map(m2int, data))
+        #print 'stack: %s' % string
 
     return logic
 

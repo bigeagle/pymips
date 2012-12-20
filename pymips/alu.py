@@ -36,10 +36,10 @@ def ALU(control, op1, op2, out_, zero, positive):
             out_.next = op1 | op2
 
         elif control == alu_code._ADD:  # int('0010',2):
-            out_.next = op1 + op2  # what happend if there is overflow ?
+            out_.next = intbv(op1 + op2)[32:].signed()  # what happend if there is overflow ?
 
         elif control == alu_code._SUB:  # int('0110',2):
-            out_.next = op1 - op2
+            out_.next = intbv(op1 - op2)[32:].signed()
 
         elif control == alu_code._SLT:  # int('0111',2):
             if op1.val < op2.val:

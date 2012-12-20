@@ -35,7 +35,7 @@ def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, 
             out_data1.next = mem[int(read_reg1)]
             out_data2.next = mem[int(read_reg2)]
 
-        #print 'reg: ', [int(i) for i in mem][0:9], [int(mem[31])]
+        # print 'reg: ', ['%x' % int(i) for i in mem][0:32]  # , [int(mem[31])]
 
     return logic
 
