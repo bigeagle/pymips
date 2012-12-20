@@ -28,6 +28,7 @@ alu_op_code = enum(
     '_SUB',
     '_LUI',
     '_ORI',
+    '_SLT',
     '_ANDI',
     '_RFORMAT',
     # branches
@@ -62,6 +63,10 @@ def alu_control(aluop, branch, funct_field, front_sel, control_out):
 
             elif aluop == alu_op_code._ADD:  # ADDI
                 control_out.next = alu_code._ADD
+                front_sel.next = 1
+
+            elif aluop == alu_op_code._SLT:  # ADDI
+                control_out.next = alu_code._SLT
                 front_sel.next = 1
 
             elif aluop == alu_op_code._LUI:  # LUI

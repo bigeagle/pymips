@@ -25,9 +25,9 @@ class DLXTestBench(unittest.TestCase):
         dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test1.txt'), data_mem=self.data_mem, reg_mem=self.reg_mem)
 
         def test():
-            yield delay(10)
-            self.assertEqual(self.reg_mem[5].val, 0)
-            yield delay(4)
+            #yield delay(10)
+            #self.assertEqual(self.reg_mem[5].val, 0)
+            yield delay(14)
             self.assertEqual(self.reg_mem[2].val, 255)
             yield delay(2)
             self.assertEqual(self.reg_mem[3].val, 254)
@@ -195,6 +195,29 @@ class DLXTestBench(unittest.TestCase):
             self.assertEqual(self.reg_mem[7], -524281)
             yield delay(2)
             self.assertEqual(self.reg_mem[7], -65536)
+
+        check = test()
+        sim = Simulation(dlx_instance, check)
+        sim.run(30, quiet=True)
+
+    def test_arithmetic(self):
+        dlx_instance = dlx(program=os.path.join(ROOT, 'programs/test8.txt'), data_mem=self.data_mem, reg_mem=self.zreg_mem)
+
+        def test():
+            yield delay(10)
+            self.assertEqual(self.zreg_mem[2].val, 5)
+            yield delay(2)
+            self.assertEqual(self.zreg_mem[3].val, 6)
+            yield delay(2)
+            self.assertEqual(self.zreg_mem[4].val, 1)
+            yield delay(2)
+            self.assertEqual(self.zreg_mem[4].val, 0)
+            yield delay(2)
+            self.assertEqual(self.zreg_mem[3].val, 6)
+            yield delay(2)
+            self.assertEqual(self.zreg_mem[2].val, 1)
+            yield delay(2)
+            self.assertEqual(self.zreg_mem[3].val, 0)
 
         check = test()
         sim = Simulation(dlx_instance, check)

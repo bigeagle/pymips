@@ -241,6 +241,17 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 Jump.next = 1
                 ALUop.next = alu_op_code._J
 
+            elif opcode == 0b001010:
+                RegDst.next = 0
+                ALUSrc.next = 1
+                MemtoReg.next = 0
+                RegWrite.next = 1
+                MemRead.next = 0
+                MemWrite.next = 0
+                Branch.next = 0
+                Jump.next = 0
+                ALUop.next = alu_op_code._SLT
+
     return logic
 
 

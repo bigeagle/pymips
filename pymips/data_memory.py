@@ -35,19 +35,19 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None
     def logic():
         dw = intbv(write_data.val, min=MIN, max=MAX)
         if memwrite == 3:
-            mem[int(address)].next = dw[8:0]
-            mem[int(address)+1].next = dw[16:8]
-            mem[int(address)+2].next = dw[24:16]
-            mem[int(address)+3].next = dw[32:24]
+            mem[int(address[16:])].next = dw[8:0]
+            mem[int(address[16:])+1].next = dw[16:8]
+            mem[int(address[16:])+2].next = dw[24:16]
+            mem[int(address[16:])+3].next = dw[32:24]
 
         elif memwrite == 1:
-            mem[int(address)].next = dw[8:0]
+            mem[int(address[16:])].next = dw[8:0]
 
         elif memread == 3:
-            read_data.next = concat(mem[int(address)+3][8:], mem[int(address)+2][8:], mem[int(address)+1][8:], mem[int(address)][8:]).signed()
+            read_data.next = concat(mem[int(address[16:])+3][8:], mem[int(address[16:])+2][8:], mem[int(address[16:])+1][8:], mem[int(address[16:])][8:]).signed()
 
         elif memread == 1:
-            read_data.next = mem[int(address)].signed()
+            read_data.next = mem[int(address[16:])].signed()
         #print 'mem:', [int(i) for i in mem][0:32]
 
     return logic
