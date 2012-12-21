@@ -29,25 +29,25 @@ def ALU(control, op1, op2, out_, zero, positive):
 
     @always_comb
     def logic_alu():
-        if control == alu_code._AND:  # int('0000',2):
+        if control == alu_code.MAND:  # int('0000',2):
             out_.next = op1 & op2
 
-        elif control == alu_code._OR:  # int('0001',2):
+        elif control == alu_code.MOR:  # int('0001',2):
             out_.next = op1 | op2
 
-        elif control == alu_code._ADD:  # int('0010',2):
+        elif control == alu_code.MADD:  # int('0010',2):
             out_.next = op1 + op2  # what happend if there is overflow ?
 
-        elif control == alu_code._SUB:  # int('0110',2):
+        elif control == alu_code.MSUB:  # int('0110',2):
             out_.next = op1 - op2
 
-        elif control == alu_code._SLT:  # int('0111',2):
+        elif control == alu_code.MSLT:  # int('0111',2):
             if op1.val < op2.val:
                 out_.next = 1
             else:
                 out_.next = 0
 
-        elif control == alu_code._NOR:  # int('1100', 2):
+        elif control == alu_code.MNOR:  # int('1100', 2):
             out_.next = ~ (op1 | op2)  # TODO check this
 
     @always_comb

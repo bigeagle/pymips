@@ -64,10 +64,10 @@ def data_memory(clk, address, write_data, read_data, memread, memwrite, mem=None
         #string = ' '.join(map(lambda g: ''.join(map(lambda x: '%02x' % x, g[::-1])), data))
         #print 'mem: %s' % string
 
-        cared = mem[-80:]
-        data = group(cared, 4)
-        string = ' '.join(map(m2int, data))
-        print 'stack: %s' % string
+        #cared = mem[-80:]
+        #data = group(cared, 4)
+        #string = ' '.join(map(m2int, data))
+        #print 'stack: %s' % string
 
     return logic
 

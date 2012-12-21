@@ -4,10 +4,10 @@
 from myhdl import always_comb, intbv, bin, enum, concat
 
 shift_op = enum(
-    '_NOP',
-    '_LL',
-    '_RL',
-    '_RA',
+    'NNOP',
+    'LL',
+    'RL',
+    'RA',
     encoding='binary'
 )
 
@@ -22,9 +22,9 @@ def shift(op, amount, control, out):
     """
     @always_comb
     def logic():
-        if control == shift_op._NOP:
+        if control == shift_op.NNOP:
             out.next = 0
-        elif control == shift_op._LL:
+        elif control == shift_op.LL:
             if amount == 0:
                 out.next = op
             elif amount == 1:
@@ -90,7 +90,7 @@ def shift(op, amount, control, out):
             elif amount == 31:
                 out.next = concat(op[1:], intbv(0)[31:]).signed()
 
-        elif control == shift_op._RL:
+        elif control == shift_op.RL:
             if amount == 0:
                 out.next = op
             elif amount == 1:
@@ -156,7 +156,7 @@ def shift(op, amount, control, out):
             elif amount == 31:
                 out.next = concat(intbv(0)[31:], op[32:31]).signed()
 
-        elif control == shift_op._RA:
+        elif control == shift_op.RA:
             if amount == 0:
                 out.next = op
             elif amount == 1:

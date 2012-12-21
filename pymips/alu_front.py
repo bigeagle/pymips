@@ -23,7 +23,7 @@ def alu_front(clk, aluop, func, shamt, op1, op2, out_1, out_2):
 
     @always(clk.negedge)
     def logic():
-        if aluop == alu_op_code._RFORMAT:
+        if aluop == alu_op_code.MRFORMAT:
             if func == 0b011000:  # MULT
                 out_1.next = 0
                 out_2.next = 0
@@ -50,13 +50,13 @@ def alu_front(clk, aluop, func, shamt, op1, op2, out_1, out_2):
                 out_1.next = 0
                 out_2.next = 0
                 HI.next = op1 % op2
-                LO.next = op1 / op2
+                LO.next = op1 // op2
 
             elif func == 0b011011:   # DIVU
                 out_1.next = 0
                 out_2.next = 0
                 HI.next = op1 % op2
-                LO.next = op1 / op2
+                LO.next = op1 // op2
 
             elif func == 13:  # break
                 raise Exception("program break")
@@ -72,22 +72,22 @@ def branch_alu_front(aluop, op1, op2, out_1, out_2):
     # branch instructions
     @always_comb
     def logic():
-        if aluop == alu_op_code._BGEZ:
+        if aluop == alu_op_code.MBGEZ:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BGEZAL:
+        elif aluop == alu_op_code.MBGEZAL:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BLTZ:
+        elif aluop == alu_op_code.MBLTZ:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BLTZAL:
+        elif aluop == alu_op_code.MBLTZAL:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BGTZ:
+        elif aluop == alu_op_code.MBGTZ:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BLEZ:
+        elif aluop == alu_op_code.MBLEZ:
             out_1.next = op1
             out_2.next = 0
         else:
@@ -109,7 +109,7 @@ def shift_alu_front(func, shamt, op1, op2, out_1, out_2):
     def logic():
         if func == 0:
             shift_in.next = op2
-            shift_ctl.next = shift_op._LL
+            shift_ctl.next = shift_op.LL
             shift_amount.next = shamt
             out_2.next = op1
             out_1.next = shift_out
@@ -123,41 +123,41 @@ def shift_alu_front(func, shamt, op1, op2, out_1, out_2):
 def comb_alu_front(aluop, func, shamt, op1, op2, out_1, out_2):
 
     shift_in, shift_out = [Signal(intbv(0, min=MIN, max=MAX)) for x in range(2)]
-    shift_ctl = Signal(shift_op._NOP)
+    shift_ctl = Signal(shift_op.NNOP)
     shift_amount = Signal(intbv(0)[5:])
 
     shift_ = shift(shift_in, shift_amount, shift_ctl, shift_out)
 
     @always_comb
     def logic():
-        if aluop == alu_op_code._RFORMAT:
+        if aluop == alu_op_code.MRFORMAT:
             if func == 0:
                 shift_in.next = op2
-                shift_ctl.next = shift_op._LL
+                shift_ctl.next = shift_op.LL
                 shift_amount.next = shamt
                 out_2.next = 0
                 out_1.next = shift_out
             elif func == 4:
                 shift_in.next = op2
-                shift_ctl.next = shift_op._LL
+                shift_ctl.next = shift_op.LL
                 shift_amount.next = op1[5:]
                 out_2.next = 0
                 out_1.next = shift_out
             elif func == 2:
                 shift_in.next = op2
-                shift_ctl.next = shift_op._RL
+                shift_ctl.next = shift_op.RL
                 shift_amount.next = shamt
                 out_2.next = 0
                 out_1.next = shift_out
             elif func == 3:
                 shift_in.next = op2
-                shift_ctl.next = shift_op._RA
+                shift_ctl.next = shift_op.RA
                 shift_amount.next = shamt
                 out_2.next = 0
                 out_1.next = shift_out
             elif func == 7:
                 shift_in.next = op2
-                shift_ctl.next = shift_op._RA
+                shift_ctl.next = shift_op.RA
                 shift_amount.next = op1[5:]
                 out_2.next = 0
                 out_1.next = shift_out
@@ -169,35 +169,35 @@ def comb_alu_front(aluop, func, shamt, op1, op2, out_1, out_2):
                 out_1.next = op1
                 out_2.next = op2
 
-        elif aluop == alu_op_code._ORI:  # ORI
+        elif aluop == alu_op_code.MORI:  # ORI
             out_1.next = op1
             out_2.next = concat(intbv(0)[16:], op2[16:])
 
-        elif aluop == alu_op_code._ANDI:  # ANDI
+        elif aluop == alu_op_code.MANDI:  # ANDI
             #print "ALU_FRONT: %s, %s" % (bin(op1, 32), bin(op2, 32))
             out_1.next = op1
             out_2.next = concat(intbv(0)[16:], op2[16:])
 
-        elif aluop == alu_op_code._LUI:  # LUI
+        elif aluop == alu_op_code.MLUI:  # LUI
             out_1.next = 0
             out_2.next = concat(op2[16:], intbv(0)[16:]).signed()
 
-        elif aluop == alu_op_code._BGEZ:
+        elif aluop == alu_op_code.MBGEZ:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BGEZAL:
+        elif aluop == alu_op_code.MBGEZAL:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BLTZ:
+        elif aluop == alu_op_code.MBLTZ:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BLTZAL:
+        elif aluop == alu_op_code.MBLTZAL:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BGTZ:
+        elif aluop == alu_op_code.MBGTZ:
             out_1.next = op1
             out_2.next = 0
-        elif aluop == alu_op_code._BLEZ:
+        elif aluop == alu_op_code.MBLEZ:
             out_1.next = op1
             out_2.next = 0
         else:
@@ -218,7 +218,7 @@ def test_instance():
 
     clkdriver_inst = clock_driver(clk)
 
-    shifter_ = comb_alu_front(alu_op_code._RFORMAT, Signal(0b000000), Signal(0b000111), op1, op2, out_1, out_2)
+    shifter_ = comb_alu_front(alu_op_code.MRFORMAT, Signal(0b000000), Signal(0b000111), op1, op2, out_1, out_2)
 
     return instances()
 
@@ -234,7 +234,7 @@ def main():
     out_2 = Signal(intbv(0, min=MIN, max=MAX))
     func = Signal(intbv(0)[6:])
     shamt = Signal(intbv(0b00111)[5:])
-    opcode = Signal(alu_op_code._RFORMAT)
+    opcode = Signal(alu_op_code.MRFORMAT)
 
     toVerilog(comb_alu_front, opcode, func, shamt, op1, op2, out_1, out_2)
 

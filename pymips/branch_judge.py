@@ -44,21 +44,21 @@ def branch_judge(clk, ALUop, branch, jump, zero, positive, out):
         if jump == 1:
             out.next = 1
         elif branch == 1:
-            if ALUop == alu_op_code._BEQ:
+            if ALUop == alu_op_code.MBEQ:
                 out.next = zero
-            elif ALUop == alu_op_code._BNE:
+            elif ALUop == alu_op_code.MBNE:
                 out.next = ~zero
-            elif ALUop == alu_op_code._BGEZ:
+            elif ALUop == alu_op_code.MBGEZ:
                 out.next = positive
-            elif ALUop == alu_op_code._BGEZAL:
+            elif ALUop == alu_op_code.MBGEZAL:
                 out.next = positive
-            elif ALUop == alu_op_code._BLTZ:
+            elif ALUop == alu_op_code.MBLTZ:
                 out.next = ~positive
-            elif ALUop == alu_op_code._BLTZAL:
+            elif ALUop == alu_op_code.MBLTZAL:
                 out.next = ~positive
-            elif ALUop == alu_op_code._BGTZ:
+            elif ALUop == alu_op_code.MBGTZ:
                 out.next = positive & (~zero)
-            elif ALUop == alu_op_code._BLEZ:
+            elif ALUop == alu_op_code.MBLEZ:
                 out.next = (~positive) | zero
         else:
             out.next = 0

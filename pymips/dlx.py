@@ -48,7 +48,7 @@ MIN_16 = -(2 ** 15)
 MAX_16 = 2 ** 15 - 1
 
 
-def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), program=None, data_mem=None, reg_mem=None):
+def dlx(Clk, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), program=None, data_mem=None, reg_mem=None):
     """
     A DLX processor with 5 pipeline stages.
     =======================================
@@ -80,14 +80,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
       ``PcAdderO_id`` after it.
 
     """
+    if Clk is None:
+        Clk = Signal(intbv(0)[1:])  # internal clock
 
-    ##############################
-    # clock settings
-    ##############################
-
-    Clk = Signal(intbv(0)[1:])  # internal clock
-
-    clk_driver = clock_driver(Clk, clk_period)
+        clk_driver = clock_driver(Clk, 1)
 
     ####################
     #feedback Signals
@@ -128,7 +124,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
 
     #pc_adder = ALU(Signal(intbv('0010')[4:]), Ip, Signal(intbv(INCREMENT)[1:]), PcAdderOut_if, Signal(intbv(0)[1:]))  # hardwiring an ALU to works as an adder
 
-    pc_adder = adder(a=Ip, b=Signal(intbv(INCREMENT)[3:]), out=PcAdderOut_if)
+    pc_adder_ = adder(a=Ip, b=Signal(intbv(INCREMENT)[3:]), out=PcAdderOut_if)
 
     #mux controlling next ip branches.
 
@@ -172,7 +168,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, Branch_id, Jump_id = signals_1bit
     MemRead_id, MemWrite_id = signals_2bit
 
-    ALUop_id = Signal(alu_op_code._NOP)
+    ALUop_id = Signal(alu_op_code.MNOP)
 
     control_ = control(Opcode_id, Rt_id, Func_id, RegDst_id, Branch_id, Jump_id, MemRead_id,
                        MemtoReg_id, ALUop_id, MemWrite_id, ALUSrc_id, RegWrite_id, NopSignal, Stall)
@@ -198,7 +194,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     RegDst_ex, ALUSrc_ex, MemtoReg_ex, RegWrite_ex, Branch_ex, Jump_ex = signals_1bit
     MemRead_ex, MemWrite_ex = signals_2bit
 
-    ALUop_ex = Signal(alu_op_code._NOP)
+    ALUop_ex = Signal(alu_op_code.MNOP)
 
     Data1_ex = Signal(intbv(0, min=MIN, max=MAX))
     Data2_ex = Signal(intbv(0, min=MIN, max=MAX))
@@ -260,7 +256,7 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     branch_jump_ = branch_jump(Branch_ex, Jump_ex, PcAdderOut_ex, BranchAddr_ex, JumpAddr_ex, ForwMux1Out, BranchAdderO_ex)
 
     #ALU Control
-    AluControl = Signal(alu_code._AND)  # control signal to alu
+    AluControl = Signal(alu_code.MAND)  # control signal to alu
     AluFrontSel = Signal(intbv(0)[1:])
     alu_control_ = alu_control(ALUop_ex, Branch_ex, Func_ex, AluFrontSel, AluControl)
 
@@ -287,29 +283,27 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
     ##############################
     # EX/MEM
     ##############################
-    Zero_mem = Signal(intbv(0)[1:])
-
     Data2_mem = Signal(intbv(0, min=MIN, max=MAX))
 
     WrRegDest_mem = Signal(intbv(0)[32:])
 
     #control signals
-    signals_1bit = [Signal(intbv(0)[1:]) for i in range(3)]
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(2)]
     signals_2bit = [Signal(intbv(0)[2:]) for i in range(2)]
-    MemtoReg_mem, RegWrite_mem, Branch_mem = signals_1bit
+    MemtoReg_mem, RegWrite_mem = signals_1bit
     MemRead_mem, MemWrite_mem = signals_2bit
 
     latch_ex_mem_ = latch_ex_mem(Clk, Reset,
                                  BranchAdderO_ex,
-                                 Data2Reg_ex, Zero_ex,
+                                 Data2Reg_ex,
                                  ForwMux2Out, RegDest_ex,
-                                 Branch_ex, MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
+                                 MemRead_ex, MemWrite_ex,  # signals to MEM pipeline stage
                                  FinalRegWrite_ex, MemtoReg_ex,  # signals to WB pipeline stage
 
                                  BranchAdderO_mem,
-                                 AluResult_mem, Zero_mem,
+                                 AluResult_mem,
                                  Data2_mem, WrRegDest_mem,
-                                 Branch_mem, MemRead_mem, MemWrite_mem,  # signals to MEM pipeline stage
+                                 MemRead_mem, MemWrite_mem,  # signals to MEM pipeline stage
                                  RegWrite_mem, MemtoReg_mem,  # signals to WB pipeline stage
                                  )
 
@@ -474,14 +468,18 @@ def testBench(args):
     data_mem = load_data_memory(args.data) if args.data else None
     program = args.program
 
+    Clk = Signal(intbv(0)[1:])  # internal clock
+
+    clk_driver = clock_driver(Clk, 1)
+
     if args.vcd:
-        datapath_i = traceSignals(dlx, program=program, data_mem=data_mem)  # () #toVHDL(datapath)
+        datapath_i = traceSignals(dlx, Clk, program=program, data_mem=data_mem)  # () #toVHDL(datapath)
     elif args.debug:
-        datapath_i = dlx(program=program, data_mem=data_mem)
+        datapath_i = dlx(Clk, program=program, data_mem=data_mem)
     elif args.to_vhdl:
-        toVHDL(dlx)
+        toVHDL(dlx, Clk, program=program, data_mem=data_mem)
     elif args.to_verilog:
-        toVerilog(dlx)
+        toVerilog(dlx, Clk, program=program, data_mem=data_mem)
 
     return instances()
 
