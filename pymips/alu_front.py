@@ -224,9 +224,9 @@ def test_instance():
 
 
 def main():
-    sim = Simulation(traceSignals(test_instance))
-    #sim = Simulation(testbench())
-    sim.run(20)
+    #sim = Simulation(traceSignals(test_instance))
+    ##sim = Simulation(testbench())
+    #sim.run(20)
 
     op1 = Signal(intbv(0b10110111, min=MIN, max=MAX))
     op2 = Signal(intbv(0b10110111, min=MIN, max=MAX))
@@ -235,8 +235,8 @@ def main():
     func = Signal(intbv(0)[6:])
     shamt = Signal(intbv(0b00111)[5:])
     opcode = Signal(alu_op_code.MRFORMAT)
-
-    toVerilog(comb_alu_front, opcode, func, shamt, op1, op2, out_1, out_2)
+    clk = Signal(intbv(1)[1:])
+    toVerilog(alu_front, clk, opcode, func, shamt, op1, op2, out_1, out_2)
 
 
 if __name__ == '__main__':

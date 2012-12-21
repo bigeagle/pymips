@@ -10,7 +10,7 @@ ALU
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL, traceSignals
+    intbv, bin, instance, instances, now, toVerilog, traceSignals
 
 from myhdl.conversion import analyze
 
@@ -100,9 +100,16 @@ def testBench_alu():
 
 
 def main():
-    tb = traceSignals(testBench_alu)
-    sim = Simulation(tb)
-    sim.run()
+    control = Signal(alu_code.MAND)
+    op1 = Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1))
+    op2 = Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1))
+    out = Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1))
+    zero = Signal(bool(False))
+    positive = Signal(bool(False))
+    toVerilog(ALU, control, op1, op2, out, zero, positive)
+    #tb = traceSignals(testBench_alu)
+    #sim = Simulation(tb)
+    #sim.run()
 
 if __name__ == '__main__':
     main()

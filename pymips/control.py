@@ -7,7 +7,7 @@ Control
 """
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 from alu_control import alu_op_code
 
@@ -74,7 +74,7 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                     ALUop.next = alu_op_code.MRFORMAT
 
             #add
-            if opcode == 0b001000:  # ADDI
+            elif opcode == 0b001000:  # ADDI
                 RegDst.next = 0
                 ALUSrc.next = 1
                 MemtoReg.next = 0
@@ -85,7 +85,7 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 Jump.next = 0
                 ALUop.next = alu_op_code.MADD
 
-            if opcode == 0b001001:  # ADDIU
+            elif opcode == 0b001001:  # ADDIU
                 RegDst.next = 0
                 ALUSrc.next = 1
                 MemtoReg.next = 0
@@ -96,7 +96,7 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 Jump.next = 0
                 ALUop.next = alu_op_code.MADD
 
-            if opcode == 0b001111:  # LUI
+            elif opcode == 0b001111:  # LUI
                 RegDst.next = 0
                 ALUSrc.next = 1
                 MemtoReg.next = 0
@@ -107,7 +107,7 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 Jump.next = 0
                 ALUop.next = alu_op_code.MLUI
 
-            if opcode == 0b001101:  # ORI
+            elif opcode == 0b001101:  # ORI
                 RegDst.next = 0
                 ALUSrc.next = 1
                 MemtoReg.next = 0
@@ -118,7 +118,7 @@ def control(opcode, Rt, func, RegDst, Branch, Jump, MemRead, MemtoReg, ALUop,
                 Jump.next = 0
                 ALUop.next = alu_op_code.MORI
 
-            if opcode == 0b001100:  # ORI
+            elif opcode == 0b001100:  # ORI
                 RegDst.next = 0
                 ALUSrc.next = 1
                 MemtoReg.next = 0
@@ -278,8 +278,21 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+    signals_1bit = [Signal(intbv(0)[1:]) for i in range(7)]
+    signals_2bit = [Signal(intbv(0)[2:]) for i in range(2)]
+    RegDst_id, ALUSrc_id, MemtoReg_id, RegWrite_id, Branch_id, Jump_id, Stall = signals_1bit
+    MemRead_id, MemWrite_id = signals_2bit
+    Opcode_id = Signal(intbv(0)[6:])  # instruction 31:26  - to Control
+
+    ALUop_id = Signal(alu_op_code.MNOP)
+    NopSignal = Signal(intbv(0)[1:])
+    Func_id = Signal(intbv(0)[6:])  # instruction 5:0    - to ALUCtrl
+    Rt_id = Signal(intbv(0)[5:])  # instruction 20:16  - to read_reg_2 and mux controlled by RegDst
+
+    toVerilog(control, Opcode_id, Rt_id, Func_id, RegDst_id, Branch_id, Jump_id, MemRead_id,
+                       MemtoReg_id, ALUop_id, MemWrite_id, ALUSrc_id, RegWrite_id, NopSignal, Stall)
 
 if __name__ == '__main__':
     main()

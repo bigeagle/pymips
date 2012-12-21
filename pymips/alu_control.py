@@ -10,7 +10,7 @@ ALU CONTROL
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL, enum
+    intbv, bin, instance, instances, now, toVerilog, enum
 
 alu_code = enum(
     'MAND',
@@ -198,8 +198,14 @@ def testBench_alu_control():
 
 def main():
     #sim = Simulation(testBench_alu_control())
-    sim = Simulation(testBench_alu_control())
-    sim.run()
+    #sim = Simulation(testBench_alu_control())
+    #sim.run()
+    aluop = Signal(alu_op_code.MNOP)
+    control_out = Signal(alu_code.MADD)
+    funct_field = Signal(intbv(0)[6:])
+    front_sel = Signal(intbv(0)[1:])
+    branch = Signal(intbv(0)[1:])
+    toVerilog(alu_control, aluop, branch, funct_field, front_sel, control_out)
 
 if __name__ == '__main__':
     main()
