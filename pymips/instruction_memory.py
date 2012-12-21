@@ -25,15 +25,17 @@ def load_program(ROM, program=None, comment_char='#'):
         line = line.split(comment_char)[0]
         line = line.replace(' ', '')
 
-        if len(line) in (8, 32):
-            try:
-                t = int(line, 2)
-            except:
-                t = int(line, 16)
-            inst = "%08x" % t
-            for i in range(4):
-                ROM[4*index+i] = int(inst[2*i:2*(i+1)], 16)
-            index += 1
+        if len(line) == 32:
+            t = int(line, 32)
+        elif len(line) == 8:
+            t = int(line, 16)
+        else:
+            continue
+
+        inst = "%08x" % t
+        for i in range(4):
+            ROM[4*index+i] = int(inst[2*i:2*(i+1)], 16)
+        index += 1
 
     return tuple(ROM)
 

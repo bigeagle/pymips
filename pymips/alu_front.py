@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding:utf-8 -*-
 
-from myhdl import Signal, always, always_comb, intbv, bin, instances, Simulation, traceSignals, toVerilog
+from myhdl import Signal, always, always_comb, intbv, bin, concat, instances, Simulation, traceSignals, toVerilog
 
 from alu_control import alu_op_code
 from shift import shift, shift_op
@@ -19,24 +19,47 @@ def alu_front(clk, aluop, func, shamt, op1, op2, out_1, out_2):
     out_2: data send to ALU
     """
 
+    HI, LO = [Signal(intbv(0, min=MIN, max=MAX)) for x in range(2)]
+
     @always(clk.negedge)
     def logic():
+        if aluop == alu_op_code._RFORMAT:
+            if func == 0b011000:  # MULT
+                out_1.next = 0
+                out_2.next = 0
+                tmp = intbv(op1 * op2)[64:]
+                HI.next = tmp[64:32].signed()
+                LO.next = tmp[32:].signed()
 
-        if aluop == alu_op_code._ORI:  # ORI
-            out_1.next = op1
-            #out_2.next[32:16] = intbv('0000000000000000')
-            out_2.next = intbv(bin(op2[16:], width=32))[32:]
+            elif func == 0b011001:  # MULTU
+                out_1.next = 0
+                out_2.next = 0
+                tmp = intbv(op1 * op2)[64:]
+                HI.next = tmp[64:32].signed()
+                LO.next = tmp[32:].signed()
 
-        elif aluop == alu_op_code._ANDI:  # ANDI
-            #print "ALU_FRONT: %s, %s" % (bin(op1, 32), bin(op2, 32))
-            out_1.next = op1
-            out_2.next = intbv(bin(op2[16:], width=32))[32:]
+            elif func == 0b010000:  # MFHI
+                out_1.next = 0
+                out_2.next = HI
 
-        elif aluop == alu_op_code._LUI:  # LUI
-            out_1.next = 0
-            #out_2.next[32:16] = op2[16:]
-            #out_2.next[16:] = intbv('0000000000000000')
-            out_2.next = op2<<16
+            elif func == 0b010010:  # MFLO
+                out_1.next = 0
+                out_2.next = LO
+
+            elif func == 0b011010:   # DIV
+                out_1.next = 0
+                out_2.next = 0
+                HI.next = op1 % op2
+                LO.next = op1 / op2
+
+            elif func == 0b011011:   # DIVU
+                out_1.next = 0
+                out_2.next = 0
+                HI.next = op1 % op2
+                LO.next = op1 / op2
+
+            elif func == 13:  # break
+                raise Exception("program break")
 
         else:
             out_1.next = op1
@@ -138,9 +161,26 @@ def comb_alu_front(aluop, func, shamt, op1, op2, out_1, out_2):
                 shift_amount.next = op1[5:]
                 out_2.next = 0
                 out_1.next = shift_out
+
+            elif func == 13:  # break
+                raise Exception("program break")
+
             else:
                 out_1.next = op1
                 out_2.next = op2
+
+        elif aluop == alu_op_code._ORI:  # ORI
+            out_1.next = op1
+            out_2.next = concat(intbv(0)[16:], op2[16:])
+
+        elif aluop == alu_op_code._ANDI:  # ANDI
+            #print "ALU_FRONT: %s, %s" % (bin(op1, 32), bin(op2, 32))
+            out_1.next = op1
+            out_2.next = concat(intbv(0)[16:], op2[16:])
+
+        elif aluop == alu_op_code._LUI:  # LUI
+            out_1.next = 0
+            out_2.next = concat(op2[16:], intbv(0)[16:]).signed()
 
         elif aluop == alu_op_code._BGEZ:
             out_1.next = op1

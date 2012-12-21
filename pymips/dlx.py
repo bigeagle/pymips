@@ -368,6 +368,10 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                                        Rs_id, Rt_id,
                                        Stall)
 
+    #@always(Clk.negedge)
+    #def info_internals():
+    #    print "Ip: %x" % Ip
+
     if DEBUG:
         @always(Clk.posedge)
         def debug_internals():
@@ -414,32 +418,32 @@ def dlx(clk_period=1, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), pro
                 print 'MuxAluDataSrc %i  | AluCtrl %s | AluResult_ex %i | Zero_ex %i' % (MuxAluDataSrc_ex, AluControl, AluResult_ex, Zero_ex)
                 print 'WrRegDest_ex %i' % WrRegDest_ex
 
-            if True:  # if now () > 6:
+            #if True:  # if now () > 6:
 
-                #MEM
-                print "\n" + "." * 35 + "MEM " + "." * 35 + "\n"
-                print "BranchAdderO_mem %i " % (BranchAdderO_mem)
+            #    #MEM
+            #    print "\n" + "." * 35 + "MEM " + "." * 35 + "\n"
+            #    print "BranchAdderO_mem %i " % (BranchAdderO_mem)
 
-                print '-->CONTROL'
-                print 'Branch %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
-                    (Branch_mem, MemRead_mem, MemWrite_mem, RegWrite_mem, MemtoReg_mem)
+            #    print '-->CONTROL'
+            #    print 'Branch %i  MemR %i  MemW %i |  RegW %i Mem2Reg %i ' % \
+            #        (Branch_mem, MemRead_mem, MemWrite_mem, RegWrite_mem, MemtoReg_mem)
 
-                print '--> Branch'
-                print 'Branch_mem %i Zero %i | PCSrc_mem %i' % (Branch_mem, Zero_mem, PCSrc_mem)
+            #    print '--> Branch'
+            #    print 'Branch_mem %i Zero %i | PCSrc_mem %i' % (Branch_mem, Zero_mem, PCSrc_mem)
 
-                print '--> Data mem'
-                print 'AluResult_mem %i | Data2_mem %i | DataMemOut_mem %i | MemW %i MemR %i' \
-                    % (AluResult_mem, Data2_mem, DataMemOut_mem, MemWrite_mem, MemRead_mem)
+            #    print '--> Data mem'
+            #    print 'AluResult_mem %i | Data2_mem %i | DataMemOut_mem %i | MemW %i MemR %i' \
+            #        % (AluResult_mem, Data2_mem, DataMemOut_mem, MemWrite_mem, MemRead_mem)
 
-                print 'WrRegDest_mem %i' % WrRegDest_mem
+            #    print 'WrRegDest_mem %i' % WrRegDest_mem
 
-            if True:  # if now() > 8:
-                #WB
-                print "\n" + "." * 35 + "WB" + "." * 35 + "\n"
-                print 'CONTROL --> RegW %i Mem2Reg %i ' % (RegWrite_mem, MemtoReg_mem)
+            #if True:  # if now() > 8:
+            #    #WB
+            #    print "\n" + "." * 35 + "WB" + "." * 35 + "\n"
+            #    print 'CONTROL --> RegW %i Mem2Reg %i ' % (RegWrite_mem, MemtoReg_mem)
 
-                print 'DataMemOut_wb %i | AluResult_wb %i | MuxMemO_wb %i ' % (DataMemOut_wb, AluResult_wb, MuxMemO_wb)
-                print 'WrRegDest_wb %i | MuxMemO_wb %i' % (WrRegDest_wb, MuxMemO_wb)
+            #    print 'DataMemOut_wb %i | AluResult_wb %i | MuxMemO_wb %i ' % (DataMemOut_wb, AluResult_wb, MuxMemO_wb)
+            #    print 'WrRegDest_wb %i | MuxMemO_wb %i' % (WrRegDest_wb, MuxMemO_wb)
 
     return instances()
 

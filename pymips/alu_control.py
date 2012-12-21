@@ -26,6 +26,8 @@ alu_op_code = enum(
     '_NOP',
     '_ADD',
     '_SUB',
+    '_MUL',
+    '_DIV',
     '_LUI',
     '_ORI',
     '_SLT',
@@ -40,6 +42,7 @@ alu_op_code = enum(
     '_BLEZ',
     '_BLTZ',
     '_BLTZAL',
+    #junps
     '_J',
     '_JAL',
     '_JALR',
@@ -71,29 +74,29 @@ def alu_control(aluop, branch, funct_field, front_sel, control_out):
 
             elif aluop == alu_op_code._LUI:  # LUI
                 control_out.next = alu_code._ADD
-                front_sel.next = 0
+                front_sel.next = 1
 
             elif aluop == alu_op_code._ORI:  # ORI
                 control_out.next = alu_code._OR
-                front_sel.next = 0
+                front_sel.next = 1
 
             elif aluop == alu_op_code._ANDI:  # ANDI
                 control_out.next = alu_code._AND
-                front_sel.next = 0
+                front_sel.next = 1
 
             elif aluop == alu_op_code._RFORMAT:
 
                 # ADD
-                if funct_field == 0b100000:
-                    control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                # if funct_field == 0b100000:
+                #    control_out.next = alu_code._ADD
+                #    front_sel.next = 1
                 # ADDU
-                elif funct_field == 0b100001:
-                    control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                # elif funct_field == 0b100001:
+                #    control_out.next = alu_code._ADD
+                #    front_sel.next = 1
 
                 # SUB
-                elif funct_field == 0b100010:
+                if funct_field == 0b100010:
                     control_out.next = alu_code._SUB
                     front_sel.next = 1
 
@@ -118,28 +121,52 @@ def alu_control(aluop, branch, funct_field, front_sel, control_out):
                     front_sel.next = 1
 
                 # SLL, SRL, SRA, SRAV, SLLV
-                elif funct_field == 0b000000:  # SLL
-                    control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                # elif funct_field == 0b000000:  # SLL
+                #     control_out.next = alu_code._ADD
+                #     front_sel.next = 1
 
-                elif funct_field == 0b000010:  # SRL
-                    control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                # elif funct_field == 0b000010:  # SRL
+                #     control_out.next = alu_code._ADD
+                #     front_sel.next = 1
 
-                elif funct_field == 0b000011:  # SRA
-                    control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                # elif funct_field == 0b000011:  # SRA
+                #     control_out.next = alu_code._ADD
+                #     front_sel.next = 1
 
-                elif funct_field == 0b000100:  # SLLV
-                    control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                # elif funct_field == 0b000100:  # SLLV
+                #     control_out.next = alu_code._ADD
+                #     front_sel.next = 1
 
-                elif funct_field == 0b000111:  # SRAV
+                # elif funct_field == 0b000111:  # SRAV
+                #     control_out.next = alu_code._ADD
+                #     front_sel.next = 1
+                elif funct_field == 0b011000:  # MULT
                     control_out.next = alu_code._ADD
-                    front_sel.next = 1
+                    front_sel.next = 0
+
+                elif funct_field == 0b011001:  # MULTU
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 0
+
+                elif funct_field == 0b010000:  # MFHI
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 0
+
+                elif funct_field == 0b010010:  # MFLO
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 0
+
+                elif funct_field == 0b011010:   # DIV
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 0
+
+                elif funct_field == 0b011011:   # DIVU
+                    control_out.next = alu_code._ADD
+                    front_sel.next = 0
+
 
                 else:
-                    control_out.next = alu_code._AND
+                    control_out.next = alu_code._ADD
                     front_sel.next = 1
             #else:
             #    control_out.next = intbv(0)
