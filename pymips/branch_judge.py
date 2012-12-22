@@ -10,7 +10,7 @@ AND gate
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 from myhdl.conversion import analyze
 
@@ -138,8 +138,18 @@ def testBench_gate():
 
 def main():
     #sim = Simulation(testBench_alu_control())
-    sim = Simulation(testBench_gate())
-    sim.run()
+    #sim = Simulation(testBench_gate())
+    #sim.run()
+    #clk, branch, jump, zero, positive, out  = [Signal(intbv(0)[1:]) for i in range(6)]
+    #ALUop = Signal(alu_op_code.MNOP)
+
+    #toVerilog(branch_judge, clk, ALUop, branch, jump, zero, positive, out)
+
+    branch_if, jump, branch_en, RegW_en, RegWrite  = [Signal(intbv(0)[1:]) for i in range(5)]
+    Ip, AluResult, Data2Reg = [Signal(intbv(0, min=-2**31, max=2**31-1)) for i in range(3)]
+    RegDest, InstRegDest = [Signal(intbv(0)[5:]) for i in range(2)]
+
+    toVerilog(data_reg_judge, branch_if, jump, branch_en, RegW_en, Ip, InstRegDest, AluResult, RegDest, Data2Reg, RegWrite)
 
 if __name__ == '__main__':
     main()

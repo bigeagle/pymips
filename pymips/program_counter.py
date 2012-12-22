@@ -8,7 +8,7 @@ Program counter
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL, traceSignals
+    intbv, bin, instance, instances, now, toVHDL, traceSignals, toVerilog
 
 from clock_driver import clock_driver
 
@@ -54,8 +54,14 @@ def testbench():
 
 def main():
     #tc =  traceSignals(testbench)
-    sim = Simulation(testbench())
-    sim.run(20)
+    #sim = Simulation(testbench())
+    #sim.run(20)
+    clk = Signal(intbv(0)[1:])
+    stall = Signal(intbv(0)[1:])
+    i = Signal(intbv(0, min=0, max=32))
+    o = Signal(intbv(0, min=0, max=32))
+
+    pc_inst = toVerilog(program_counter, clk, i, o, stall)
 
 if __name__ == '__main__':
     main()

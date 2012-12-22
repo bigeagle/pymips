@@ -9,7 +9,7 @@ Sign Extender
 import random
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 
 def sign_extend(input16, output32):
@@ -43,8 +43,13 @@ def testBench():
 
 def main():
     #sim = Simulation(testBench_alu_control())
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+    data_in = Signal(intbv(0, min=-(2 ** 15), max=2 ** 15 - 1))
+
+    data_out = Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1))
+
+    toVerilog(sign_extend, data_in, data_out)
 
 if __name__ == '__main__':
     main()

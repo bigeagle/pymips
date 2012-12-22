@@ -97,7 +97,7 @@ def dlx(Clk, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), program=None
     FlushOnBranch = PCSrc_mem           # 1 when beq condition is asserted => flush IF / ID / EX to discard
                                         # instructions chargued wrongly
 
-    WrRegDest_wb = Signal(intbv(0)[32:])  # register pointer where MuxMemO_wb data will be stored.
+    WrRegDest_wb = Signal(intbv(0)[5:])  # register pointer where MuxMemO_wb data will be stored.
     MuxMemO_wb = Signal(intbv(0, min=MIN, max=MAX))  # data output from WB mux connected as Write Data input on Register File (ID stage)
 
     RegWrite_wb = Signal(intbv(0)[1:])
@@ -252,7 +252,6 @@ def dlx(Clk, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), program=None
     mux_alu_front_src_ = mux2(sel=ALUSrc_ex, mux_out=MuxAluDataSrc_ex, chan1=ForwMux2Out, chan2=Address32_ex)
 
     #Branch adder
-    #branch_jump_ = adder(PcAdderOut_ex, BranchAddr_ex, BranchAdderO_ex)
     branch_jump_ = branch_jump(Branch_ex, Jump_ex, PcAdderOut_ex, BranchAddr_ex, JumpAddr_ex, ForwMux1Out, BranchAdderO_ex)
 
     #ALU Control
@@ -285,7 +284,7 @@ def dlx(Clk, Reset=Signal(intbv(0)[1:]), Zero=Signal(intbv(0)[1:]), program=None
     ##############################
     Data2_mem = Signal(intbv(0, min=MIN, max=MAX))
 
-    WrRegDest_mem = Signal(intbv(0)[32:])
+    WrRegDest_mem = Signal(intbv(0)[5:])
 
     #control signals
     signals_1bit = [Signal(intbv(0)[1:]) for i in range(2)]

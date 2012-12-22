@@ -9,13 +9,13 @@ Register file
 import random
 
 from myhdl import Signal, delay, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 
 def register_file(clk, read_reg1, read_reg2, write_reg, data_in, write_control, out_data1, out_data2, depth=32, mem=None):
 
-    rname = {0:'0', 1:'at', 2: 'v0', 3: 'v1', 4: 'a0', 5: 'a1', 6:'a2', 7:'a3', 8: 't0', 9: 't1', 10: 't2', 11: 't3', 12: 't4', 13: 't5', 14: 't6', 15: 't7', \
-             16: 's0', 17: 's1', 18: 's2', 19: 's3', 20: 's4', 21: 's5', 22: 's6', 23: 's7', 24:'t8', 25:'t9', 26:'k0', 27:'k1', 28:'gp', 29:'sp', 30:'fp', 31:'rt'}
+    #rname = {0:'0', 1:'at', 2: 'v0', 3: 'v1', 4: 'a0', 5: 'a1', 6:'a2', 7:'a3', 8: 't0', 9: 't1', 10: 't2', 11: 't3', 12: 't4', 13: 't5', 14: 't6', 15: 't7', \
+    #         16: 's0', 17: 's1', 18: 's2', 19: 's3', 20: 's4', 21: 's5', 22: 's6', 23: 's7', 24:'t8', 25:'t9', 26:'k0', 27:'k1', 28:'gp', 29:'sp', 30:'fp', 31:'rt'}
     mem = mem or [Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(depth)]
     #print mem
 
@@ -97,8 +97,17 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+
+    clk = Signal(intbv(1)[1:])
+    read_reg1, read_reg2, write_reg = [Signal(intbv(0)[5:]) for i in range(3)]
+
+    data_in, out_data1, out_data2 = [Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(3)]
+
+    write_control = Signal(intbv(0)[1:])
+
+    toVerilog(register_file, clk, read_reg1, read_reg2, write_reg, data_in, write_control, out_data1, out_data2)
 
 if __name__ == '__main__':
     main()

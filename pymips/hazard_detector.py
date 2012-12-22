@@ -10,7 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 
 def hazard_detector(MemRead_ex, Rt_ex,
@@ -165,7 +165,15 @@ class testBench(unittest.TestCase):
 
 
 def main():
-    unittest.main()
+    #unittest.main()
+
+    Rt_ex, Rs_id, Rt_id = [Signal(intbv(0)[5:]) for i in range(3)]
+
+    MemRead_ex, Stall = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    toVerilog(hazard_detector, MemRead_ex, Rt_ex, Rs_id, Rt_id, Stall)
+
+
 
 if __name__ == '__main__':
     main()

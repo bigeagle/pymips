@@ -10,7 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, now, toVHDL
+    intbv, bin, instance, now, toVHDL, toVerilog
 
 
 def mux2(sel, mux_out, chan1, chan2):
@@ -78,8 +78,14 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run(100)
+    #sim = Simulation(testBench())
+    #sim.run(100)
+    I0, I1, I2, I3 = [Signal(intbv(random.randint(0, 255))[32:]) for i in range(4)]
+    O = Signal(intbv(0)[32:])
+    S = Signal(intbv(0, min=0, max=4))
+
+    toVerilog(mux2, S, O, I2, I3)
+    toVerilog(mux4, S, O, I0, I1, I2, I3)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ Instruction decoder
 """
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, now, toVHDL
+    intbv, bin, instance, now, toVHDL, toVerilog
 
 
 def instruction_dec(instruction, opcode, rs, rt, rd, shamt, func, address, jump, NopSignal=Signal(intbv(0)[1:])):
@@ -49,9 +49,19 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+    instruction = Signal(intbv(0)[32:])
+    opcode = Signal(intbv(0)[6:])
+    rs = Signal(intbv(0)[5:])
+    rt = Signal(intbv(0)[5:])
+    rd = Signal(intbv(0)[5:])
+    shamt = Signal(intbv(0)[5:])
+    func = Signal(intbv(0)[6:])
+    address = Signal(intbv(0)[16:])
+    jump = Signal(intbv(0)[26:])
 
+    toVerilog(instruction_dec, instruction, opcode, rs, rt, rd, shamt, func, address, jump, NopSignal=Signal(intbv(0)[1:]))
 
 if __name__ == '__main__':
     main()

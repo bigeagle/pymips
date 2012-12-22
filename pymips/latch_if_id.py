@@ -10,7 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 
 def latch_if_id(clk, rst, instruction_in, ip_in, instruction_out, ip_out, stall=Signal(intbv(0)[1:])):
@@ -72,8 +72,13 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+    i_in, pc_in, i_out, pc_out = [Signal(intbv(0)[32:]) for i in range(4)]
+
+    clk, rst, stall = [Signal(intbv(0)[1:]) for i in range(3)]
+
+    toVerilog(latch_if_id, clk, rst, i_in, pc_in, i_out, pc_out, stall)
 
 
 if __name__ == '__main__':

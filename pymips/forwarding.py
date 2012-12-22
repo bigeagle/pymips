@@ -10,7 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 
 def forwarding(RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,  # inputs of EX hazards
@@ -185,7 +185,17 @@ class testBench(unittest.TestCase):
 
 
 def main():
-    unittest.main()
+    Rd_mem, Rs_ex, Rt_ex, Rd_wb = [Signal(intbv(0)[5:]) for i in range(4)]
+
+    RegWrite_mem, RegWrite_wb = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    ForwardA, ForwardB = [Signal(intbv(0)[2:]) for i in range(2)]
+
+    forwarding_ = toVerilog(forwarding, RegWrite_mem, Rd_mem, Rs_ex, Rt_ex,  # inputs of EX hazards
+                                RegWrite_wb, Rd_wb,  # left inputs of MEM hazards
+                                ForwardA, ForwardB
+                                )
+
 
 if __name__ == '__main__':
     main()

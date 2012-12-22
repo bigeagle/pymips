@@ -10,7 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 #from alu_control import alu_op_code
 
@@ -133,8 +133,38 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+    pc_adder_in, data1_in, data2_in, address32_in, jumpaddr_in = [Signal(intbv(random.randint(-255, 255), min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(5)]
+    pc_adder_out, data1_out, data2_out, address32_out, branch_addr32_out, jumpaddr_out = [Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(6)]
+
+    rs_in, rd_in, rt_in, rd_out, rt_out, rs_out, shamt_in, shamt_out = [Signal(intbv(0)[5:]) for i in range(8)]
+    func_in, func_out = [Signal(intbv(0)[6:]) for i in range(2)]
+
+    RegDst_in, ALUop_in, ALUSrc_in = [Signal(intbv(0)[1:]) for i in range(3)]
+    Branch_in, Jump_in, MemRead_in, MemWrite_in = [Signal(intbv(0)[1:]) for i in range(4)]
+    RegWrite_in, MemtoReg_in = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    RegDst_out, ALUop_out, ALUSrc_out = [Signal(intbv(0)[1:]) for i in range(3)]
+    Branch_out, Jump_out, MemRead_out, MemWrite_out = [Signal(intbv(0)[1:]) for i in range(4)]
+    RegWrite_out, MemtoReg_out = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    clk = Signal(intbv(0)[1:])
+    rst = Signal(intbv(0)[1:])
+
+    toVerilog(latch_id_ex, clk, rst,
+            pc_adder_in,
+            data1_in, data2_in, address32_in, jumpaddr_in,
+            rs_in, rt_in, rd_in, shamt_in, func_in,
+            RegDst_in, ALUop_in, ALUSrc_in,  # signals to EX pipeline stage
+            Branch_in, Jump_in, MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
+            RegWrite_in, MemtoReg_in,  # signals to WB pipeline stage
+            pc_adder_out,
+            data1_out, data2_out, address32_out, branch_addr32_out, jumpaddr_out,
+            rs_out, rt_out, rd_out, shamt_out, func_out,
+            RegDst_out, ALUop_out, ALUSrc_out,
+            Branch_out, Jump_out, MemRead_out, MemWrite_out,
+            RegWrite_out, MemtoReg_out)
 
 
 if __name__ == '__main__':

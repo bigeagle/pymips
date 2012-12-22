@@ -10,7 +10,7 @@ import random
 
 
 from myhdl import Signal, delay, always_comb, always, Simulation, \
-    intbv, bin, instance, instances, now, toVHDL
+    intbv, bin, instance, instances, now, toVHDL, toVerilog
 
 
 def latch_ex_mem(clk, rst,
@@ -19,6 +19,7 @@ def latch_ex_mem(clk, rst,
                  data2_in, wr_reg_in,
                  MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
                  RegWrite_in, MemtoReg_in,  # signals to WB pipeline stage
+
                  branch_adder_out,
                  alu_result_out,
                  data2_out, wr_reg_out,
@@ -117,8 +118,35 @@ def testBench():
 
 
 def main():
-    sim = Simulation(testBench())
-    sim.run()
+    #sim = Simulation(testBench())
+    #sim.run()
+    branch_adder_in, alu_result_in, data2_in, wr_reg_in = [Signal(intbv(random.randint(-255, 255), min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(4)]
+    branch_adder_out, alu_result_out, data2_out, wr_reg_out = [Signal(intbv(0, min=-(2 ** 31), max=2 ** 31 - 1)) for i in range(4)]
+
+    zero_in, zero_out = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    Branch_in, MemRead_in, MemWrite_in = [Signal(intbv(0)[1:]) for i in range(3)]
+    RegWrite_in, MemtoReg_in = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    Branch_out, MemRead_out, MemWrite_out = [Signal(intbv(0)[1:]) for i in range(3)]
+    RegWrite_out, MemtoReg_out = [Signal(intbv(0)[1:]) for i in range(2)]
+
+    clk = Signal(intbv(0)[1:])
+    rst = Signal(intbv(0)[1:])
+
+
+    toVerilog(latch_ex_mem, clk, rst,
+                        branch_adder_in,
+                        alu_result_in,
+                        data2_in, wr_reg_in,
+                        MemRead_in, MemWrite_in,  # signals to MEM pipeline stage
+                        RegWrite_in, MemtoReg_in,  # signals to WB pipeline stage
+                        branch_adder_out,
+                        alu_result_out,
+                        data2_out, wr_reg_out,
+                        MemRead_out, MemWrite_out,
+                        RegWrite_out, MemtoReg_out,
+                        )
 
 
 if __name__ == '__main__':
