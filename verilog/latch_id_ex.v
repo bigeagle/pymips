@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:17:07 2012
 
 
-`timescale 1ns/10ps
-
 module latch_id_ex (
     clk,
     rst,
@@ -56,19 +54,19 @@ input signed [31:0] pc_adder_in;
 input signed [31:0] data1_in;
 input signed [31:0] data2_in;
 input signed [31:0] address32_in;
-input signed [31:0] jumpaddr_in;
+input signed [25:0] jumpaddr_in;
 input [4:0] rs_in;
 input [4:0] rt_in;
 input [4:0] rd_in;
 input [4:0] shamt_in;
 input [5:0] func_in;
 input [0:0] RegDst_in;
-input [0:0] ALUop_in;
+input [4:0] ALUop_in;
 input [0:0] ALUSrc_in;
 input [0:0] Branch_in;
 input [0:0] Jump_in;
-input [0:0] MemRead_in;
-input [0:0] MemWrite_in;
+input [1:0] MemRead_in;
+input [1:0] MemWrite_in;
 input [0:0] RegWrite_in;
 input [0:0] MemtoReg_in;
 output signed [31:0] pc_adder_out;
@@ -95,18 +93,18 @@ output [5:0] func_out;
 reg [5:0] func_out;
 output [0:0] RegDst_out;
 reg [0:0] RegDst_out;
-output [0:0] ALUop_out;
-reg [0:0] ALUop_out;
+output [4:0] ALUop_out;
+reg [4:0] ALUop_out;
 output [0:0] ALUSrc_out;
 reg [0:0] ALUSrc_out;
 output [0:0] Branch_out;
 reg [0:0] Branch_out;
 output [0:0] Jump_out;
 reg [0:0] Jump_out;
-output [0:0] MemRead_out;
-reg [0:0] MemRead_out;
-output [0:0] MemWrite_out;
-reg [0:0] MemWrite_out;
+output [1:0] MemRead_out;
+reg [1:0] MemRead_out;
+output [1:0] MemWrite_out;
+reg [1:0] MemWrite_out;
 output [0:0] RegWrite_out;
 reg [0:0] RegWrite_out;
 output [0:0] MemtoReg_out;

@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 13:53:28 2012
 
 
-`timescale 1ns/10ps
-
 module branch_jump (
     branch,
     jump,

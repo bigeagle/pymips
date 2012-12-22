@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:23:52 2012
 
 
-`timescale 1ns/10ps
-
 module latch_if_id (
     clk,
     rst,

@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 13:58:07 2012
 
 
-`timescale 1ns/10ps
-
 module mux4 (
     sel,
     mux_out,

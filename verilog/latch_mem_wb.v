@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:25:04 2012
 
 
-`timescale 1ns/10ps
-
 module latch_mem_wb (
     clk,
     rst,
@@ -25,7 +23,7 @@ input [0:0] clk;
 input [0:0] rst;
 input signed [31:0] ram_in;
 input signed [31:0] alu_result_in;
-input signed [31:0] wr_reg_in;
+input signed [4:0] wr_reg_in;
 input [0:0] RegWrite_in;
 input [0:0] MemtoReg_in;
 output signed [31:0] ram_out;
@@ -33,7 +31,7 @@ reg signed [31:0] ram_out;
 output signed [31:0] alu_result_out;
 reg signed [31:0] alu_result_out;
 output signed [31:0] wr_reg_out;
-reg signed [31:0] wr_reg_out;
+reg signed [4:0] wr_reg_out;
 output [0:0] RegWrite_out;
 reg [0:0] RegWrite_out;
 output [0:0] MemtoReg_out;

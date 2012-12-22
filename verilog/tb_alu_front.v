@@ -1,5 +1,6 @@
 `include "comb_alu_front.v"
 `include "alu_front.v"
+`timescale 10ns/1ns;
 
 module tb_alu_front;
 

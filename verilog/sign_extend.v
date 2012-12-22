@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:32:45 2012
 
 
-`timescale 1ns/10ps
-
 module sign_extend (
     input16,
     output32

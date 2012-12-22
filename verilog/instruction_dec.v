@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:03:41 2012
 
 
-`timescale 1ns/10ps
-
 module instruction_dec (
     instruction,
     opcode,

@@ -3,25 +3,24 @@
 // Date: Sat Dec 22 13:58:07 2012
 
 
-`timescale 1ns/10ps
-
 module mux2 (
     sel,
     mux_out,
     chan1,
     chan2
 );
+parameter dataWidth=32;
 // 2-channels m-bits multiplexor
 // 
 // channels: generic bits input vectors
 // mux_out: is the output vector
 // sel: is the channel selector
 
-input [1:0] sel;
-output [31:0] mux_out;
-reg [31:0] mux_out;
-input [31:0] chan1;
-input [31:0] chan2;
+input sel;
+output [dataWidth-1:0] mux_out;
+reg [dataWidth-1:0] mux_out;
+input [dataWidth-1:0] chan1;
+input [dataWidth-1:0] chan2;
 
 
 

@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:31:17 2012
 
 
-`timescale 1ns/10ps
-
 module register_file (
     clk,
     reset,
@@ -57,7 +55,7 @@ always @(negedge clk) begin: REGISTER_FILE_LOGIC
     end
 end
 
-always @(posedge reset) begin
+always @(negedge reset) begin
     out_data1 <= 0;
     out_data2 <= 0;
     for(j=0; j<32; j=j+1) begin

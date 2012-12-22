@@ -3,8 +3,6 @@
 // Date: Fri Dec 21 20:31:39 2012
 
 
-`timescale 1ns/10ps
-
 module alu_front (
     clk,
     aluop,

@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:44:58 2012
 
 
-`timescale 1ns/10ps
-
 module hazard_detector (
     MemRead_ex,
     Rt_ex,
@@ -19,7 +17,7 @@ module hazard_detector (
 // it controls the writing of PC and IF/ID registers plus a multiplexor
 // that choose between the real control values or all 0s
 
-input [0:0] MemRead_ex;
+input [1:0] MemRead_ex;
 input [4:0] Rt_ex;
 input [4:0] Rs_id;
 input [4:0] Rt_id;

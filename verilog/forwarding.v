@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 14:47:16 2012
 
 
-`timescale 1ns/10ps
-
 module forwarding (
     RegWrite_mem,
     Rd_mem,

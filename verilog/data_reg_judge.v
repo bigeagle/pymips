@@ -3,8 +3,6 @@
 // Date: Sat Dec 22 15:55:40 2012
 
 
-`timescale 1ns/10ps
-
 module data_reg_judge (
     branch_if,
     jump,
