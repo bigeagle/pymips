@@ -8,8 +8,6 @@ It's not tested on hardware yet, but i've converted it to Verilog and simulated 
 
 At the beginning of my course project i was not a bit familar with MIPS, and i was tring to implement a MIPS simulator in Python which describes MIPS at behavioral level without any RTL level description such as pipeline, which is only to help me learn MIPS instruction and mechanism. Then i search "MIPS" on github and found mgaitan's [pymips](https://github.com/mgaitan/pymips) project which implement a pipelined MIPS at RTL, so i forked this project and fixed some bugs and  implemented almost the whole MIPS instruction set except for floating point and intterruption, so that a normal MIPS program can run in pymips. 
 
-There are still some problems that may happen in synthesis, such as the `div` instruction was implemented with `/` instead of a divider, where most synthesi tool cannot handle `/` very well, and i assumned `mul` and `div` opperations can be implemented with combinational logic circuits, although i've implemented some backdoor to do this, where data passed to ALU is firstly passed to 2 circuits that one of them is implemented with sequential logic, and then selected by a signal related to instruction type, so that data needed by `div` and `mul` instructions a processed with sequencial logic. But the problem is I did not implement the signal to stall the pipeline when one instruction cannot be excuted within one clock cycle and that would cause data harzard. I'd solve this problem in future.
-
 ## Install and Run
 
 It was implemented with python's [myHDL](http://myhdl.org/) and it is the only depencency. So try in following steps:

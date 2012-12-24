@@ -158,6 +158,8 @@ wire signed [32-1:0] MuxAluDataSrc_ex;
 wire [4:0] WrRegDest_ex;
 wire [2:0] AluControl;
 wire AluFrontSel;
+wire MultiClk_ex;
+wire ALUBusy; 
 
 wire [4:0] RegDest_ex;
 wire signed [32-1:0] Data2Reg_ex;
@@ -241,9 +243,9 @@ mux2 mux_alu_front_src_ (.sel(ALUSrc_ex), .mux_out(MuxAluDataSrc_ex), .chan1(For
 
 branch_jump branch_jump_ (Branch_ex, Jump_ex, PcAdderOut_ex, BranchAddr_ex, JumpAddr_ex, ForwMux1Out, BranchAdderO_ex);
 
-alu_control alu_control_ (Rst, ALUop_ex, Branch_ex, Func_ex, AluFrontSel, AluControl, Halt);
+alu_control alu_control_ (Rst, ALUop_ex, Branch_ex, ALUBusy, Func_ex, AluFrontSel, MultiClk_ex, AluControl, Halt);
 
-alu_front Clk_Alu_front_ (Clk, ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2);
+alu_front Clk_Alu_front_ (Clk, Rst, ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2, ALUBusy);
 comb_alu_front Comb_Alu_front_ (ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, BALUFout1, BALUFout2);
 
 mux2  mux_alu_src1_ (AluFrontSel, ALUIn1, ALUFout1, BALUFout1);
@@ -304,7 +306,7 @@ forwarding Forwarder (RegWrite_mem, WrRegDest_mem, Rs_ex, Rt_ex,
 
 // -----------  Harzard Detect -----------
 
-hazard_detector Hazard_detector_ (MemRead_ex, Rt_ex, Rs_id, Rt_id, Stall);
+hazard_detector Hazard_detector_ (MultiClk_ex, MemRead_ex, Rt_ex, Rs_id, Rt_id, Stall);
 
 
 endmodule

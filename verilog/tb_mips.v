@@ -35,7 +35,7 @@ initial begin
     $readmemh("piram.txt", DataMemory);
 
     #2 Reset = 1'b0;
-    #45000 $finish;      // Terminate simulation
+    #450000 $finish;      // Terminate simulation
 end
 
 always #1 Clk = ~Clk;

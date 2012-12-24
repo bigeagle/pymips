@@ -6,13 +6,16 @@ module alu_control (
     reset,
     aluop,
     branch,
+    alu_busy,
     funct_field,
     front_sel,
+    mul_clk,
     control_out,
     halt
 );
 
 input reset;
+input alu_busy;
 input [4:0] aluop;
 input [0:0] branch;
 input [5:0] funct_field;
@@ -20,6 +23,8 @@ output [0:0] front_sel;
 reg [0:0] front_sel;
 output [2:0] control_out;
 reg [2:0] control_out;
+output mul_clk;
+reg mul_clk;
 output halt;
 reg halt;
 
@@ -31,82 +36,104 @@ always @(negedge reset) begin
     halt = 0;
 end
 
-always @(aluop, funct_field, branch) begin: ALU_CONTROL_LOGIC
+always @(aluop, funct_field, branch, alu_busy) begin: ALU_CONTROL_LOGIC
     if ((branch == 1)) begin
         front_sel = 1;
         control_out = ALU_SUB;
+    end
+    else if (alu_busy == 1) begin
+        front_sel = 1;
+        control_out = ALU_ADD;
+        mul_clk = 1;
     end
     else begin
         case (aluop)
             ALU_OP_NOP: begin
                 control_out = ALU_ADD;
                 front_sel = 1;
+                mul_clk = 0;
             end
             ALU_OP_ADD: begin
                 control_out = ALU_ADD;
                 front_sel = 1;
+                mul_clk = 0;
             end
             ALU_OP_SLT: begin
                 control_out = ALU_SLT;
                 front_sel = 1;
+                mul_clk = 0;
             end
             ALU_OP_LUI: begin
                 control_out = ALU_ADD;
                 front_sel = 1;
+                mul_clk = 0;
             end
             ALU_OP_ORI: begin
                 control_out = ALU_OR;
                 front_sel = 1;
+                mul_clk = 0;
             end
             ALU_OP_ANDI: begin
                 control_out = ALU_AND;
                 front_sel = 1;
+                mul_clk = 0;
             end
             ALU_OP_RFORMAT: begin
                 case (funct_field)
                     'h22: begin
                         control_out = ALU_SUB;
                         front_sel = 1;
+                        mul_clk = 0;
                     end
                     'h23: begin
                         control_out = ALU_SUB;
                         front_sel = 1;
+                        mul_clk = 0;
                     end
                     'h24: begin
                         control_out = ALU_AND;
                         front_sel = 1;
+                        mul_clk = 0;
                     end
                     'h25: begin
                         control_out = ALU_OR;
                         front_sel = 1;
+                        mul_clk = 0;
                     end
                     'h2a: begin
                         control_out = ALU_SLT;
                         front_sel = 1;
+                        mul_clk = 0;
                     end
                     'h18: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                        mul_clk = 1;
                     end
                     'h19: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                        mul_clk = 1;
                     end
                     'h10: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                        mul_clk = 0;
                     end
                     'h12: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                        mul_clk = 0;
                     end
                     'h1a: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                        mul_clk = 1;
                     end
                     'h1b: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                        mul_clk = 1;
                     end
                     'hd: begin
                         halt = 1;
@@ -114,6 +141,7 @@ always @(aluop, funct_field, branch) begin: ALU_CONTROL_LOGIC
                     default: begin
                         control_out = ALU_ADD;
                         front_sel = 1;
+                        mul_clk = 0;
                     end
                 endcase
             end

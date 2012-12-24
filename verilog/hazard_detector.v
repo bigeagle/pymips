@@ -4,6 +4,7 @@
 
 
 module hazard_detector (
+    MultiClkEx,
     MemRead_ex,
     Rt_ex,
     Rs_id,
@@ -16,7 +17,7 @@ module hazard_detector (
 // 
 // it controls the writing of PC and IF/ID registers plus a multiplexor
 // that choose between the real control values or all 0s
-
+input MultiClkEx;
 input [1:0] MemRead_ex;
 input [4:0] Rt_ex;
 input [4:0] Rs_id;
@@ -24,17 +25,17 @@ input [4:0] Rt_id;
 output [0:0] Stall;
 reg [0:0] Stall;
 
-
-
-
-
-
-always @(Rt_id, Rs_id, Rt_ex, MemRead_ex) begin: HAZARD_DETECTOR_LOGIC
-    if (((MemRead_ex != 0) && ((Rt_ex == Rs_id) || (Rt_ex == Rt_id)))) begin
+always @(Rt_id, Rs_id, Rt_ex, MemRead_ex, MultiClkEx) begin: HAZARD_DETECTOR_LOGIC
+    if (MultiClkEx == 1) begin
         Stall = 1;
     end
-    else begin
-        Stall = 0;
+    else begin 
+        if (((MemRead_ex != 0) && ((Rt_ex == Rs_id) || (Rt_ex == Rt_id)))) begin
+            Stall = 1;
+        end
+        else begin
+            Stall = 0;
+        end
     end
 end
 
