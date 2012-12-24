@@ -29,7 +29,8 @@ module mips_processor(
     MemWrite,       // Data Memory Write
     MemAddr,        // Data Memroy Address
     Instruction,    // Instruction From Instruction Memory
-    InstAddr       // Instruction Address
+    InstAddr,       // Instruction Address
+    Halt            // Halt Signal
 );
 
 
@@ -45,6 +46,7 @@ output [1:0] MemRead;
 output [1:0] MemWrite;
 output [32-1:0] MemAddr;
 output [32-1:0] InstAddr;
+output  Halt;
 //output InstRead;
 
 // ------ Type of Input Ports -------------
@@ -59,6 +61,7 @@ wire [32-1:0] MemAddr;
 wire [32-1:0] InstAddr;
 wire [1:0] MemRead;
 wire [1:0] MemWrite;
+wire Halt;
 //wire InstRead;
 
 
@@ -238,7 +241,7 @@ mux2 mux_alu_front_src_ (.sel(ALUSrc_ex), .mux_out(MuxAluDataSrc_ex), .chan1(For
 
 branch_jump branch_jump_ (Branch_ex, Jump_ex, PcAdderOut_ex, BranchAddr_ex, JumpAddr_ex, ForwMux1Out, BranchAdderO_ex);
 
-alu_control alu_control_ (ALUop_ex, Branch_ex, Func_ex, AluFrontSel, AluControl);
+alu_control alu_control_ (Rst, ALUop_ex, Branch_ex, Func_ex, AluFrontSel, AluControl, Halt);
 
 alu_front Clk_Alu_front_ (Clk, ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, ALUFout1, ALUFout2);
 comb_alu_front Comb_Alu_front_ (ALUop_ex, Func_ex, Shamt_ex, ForwMux1Out, MuxAluDataSrc_ex, BALUFout1, BALUFout2);

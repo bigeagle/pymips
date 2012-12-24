@@ -3,14 +3,16 @@
 // Date: Fri Dec 21 21:11:27 2012
 
 module alu_control (
+    reset,
     aluop,
     branch,
     funct_field,
     front_sel,
-    control_out
+    control_out,
+    halt
 );
 
-
+input reset;
 input [4:0] aluop;
 input [0:0] branch;
 input [5:0] funct_field;
@@ -18,8 +20,16 @@ output [0:0] front_sel;
 reg [0:0] front_sel;
 output [2:0] control_out;
 reg [2:0] control_out;
+output halt;
+reg halt;
 
 `include "alu_code.v"
+
+always @(negedge reset) begin
+    control_out = ALU_ADD;
+    front_sel = 0;
+    halt = 0;
+end
 
 always @(aluop, funct_field, branch) begin: ALU_CONTROL_LOGIC
     if ((branch == 1)) begin
@@ -97,6 +107,9 @@ always @(aluop, funct_field, branch) begin: ALU_CONTROL_LOGIC
                     'h1b: begin
                         control_out = ALU_ADD;
                         front_sel = 0;
+                    end
+                    'hd: begin
+                        halt = 1;
                     end
                     default: begin
                         control_out = ALU_ADD;
